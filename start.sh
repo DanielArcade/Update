@@ -34,7 +34,7 @@ sudo chmod 777 /usr/bin/qr-code
 
 sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
 sleep 2
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/cobranca
+sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
