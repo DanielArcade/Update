@@ -3,29 +3,30 @@
 
 7z x  attractplus.7z 
 rm -r attractplus.7z
-sudo cp "attractplus" "/usr/local/bin"
+sudo cp "/home/arcade/Update/attractplus" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus"
 
  
-sudo cp -r qr-code /usr/local/bin
+ 
+sudo cp qr-code /usr/local/bin
 
 sleep 2
 sudo chmod 777 /usr/bin/qr-code
 
 
-sudo cp -r "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
+sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
 sleep 2
 sudo chmod -R 777 /home/arcade/shared/frontends/attract/cobranca
 
 
-sudo cp -r "teclado" "/usr/local/bin"
+sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
 
 sleep 2
 sudo chmod 777 /usr/bin/teclado 
 
 
-sudo rm -R /home/arcade/Update
-sudo rm -R /home/arcade/.local/share/Trash
+sudo rm -rf /home/arcade/Update
+sudo rm -rf /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
 #sudo chmod -R 777 /home/arcade/shared/frontends/attract
 dialog --infobox "Reiniciando..." 10 20 
