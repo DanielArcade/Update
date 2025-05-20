@@ -3,11 +3,11 @@
 
 7z x  attractplus.7z 
 rm -r attractplus.7z
-sudo cp "/home/arcade/Update/attractplus" "/usr/local/bin"
+sudo cp "attractplus" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus"
 
  
-sudo cp -r "/home/arcade/Update/qr-code" "/usr/local/bin"
+sudo cp -r qr-code /usr/local/bin
 
 sleep 2
 sudo chmod 777 /usr/bin/qr-code
@@ -18,7 +18,7 @@ sleep 2
 sudo chmod -R 777 /home/arcade/shared/frontends/attract/cobranca
 
 
-sudo cp -r "/home/arcade/Update/teclado" "/usr/local/bin"
+sudo cp -r "teclado" "/usr/local/bin"
 
 sleep 2
 sudo chmod 777 /usr/bin/teclado 
