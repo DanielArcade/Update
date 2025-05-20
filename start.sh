@@ -72,7 +72,7 @@ sudo rm -R /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
 #sudo chmod -R 777 /home/arcade/shared/frontends/attract
 dialog --infobox "Reiniciando..." 10 20 
-sleep 3 
+sleep 10 
 clear
 reboot
  
