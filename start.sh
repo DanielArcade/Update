@@ -23,6 +23,13 @@ sleep 2
 sudo chmod 777 /usr/bin/teclado 
 
 
+
+
+sudo cp -r "/home/arcade/Update/splash.png" /usr/share/plymouth/themes/groovy
+sudo plymouth-set-default-theme -R groovy
+
+
+
 sudo rm -R /home/arcade/Update
 sudo rm -R /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
