@@ -29,7 +29,7 @@ sudo chmod 777 "/usr/local/bin/attractplus-x11"
  
 sudo cp "/home/arcade/Update//qr-code" "/usr/local/bin"
 sleep 2
-sudo chmod 777 /usr/bin/qr-code
+sudo chmod 777 /usr/local/bin/qr-code
 
 
 sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
@@ -39,7 +39,7 @@ sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
 sleep 2
-sudo chmod 777 /usr/bin/teclado 
+sudo chmod 777 /usr/local/bin/teclado 
 
 
 
