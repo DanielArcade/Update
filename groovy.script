@@ -1,5 +1,8 @@
-Window.SetBackgroundTopColor(0.12, 0.20, 0.33); #RGB: 30,50,85
-Window.SetBackgroundBottomColor(0.06, 0.13, 0.21); #RGB: 15,33,64
+#Window.SetBackgroundTopColor(0.12, 0.20, 0.33); #RGB: 30,50,85
+#Window.SetBackgroundBottomColor(0.06, 0.13, 0.21); #RGB: 15,33,64
+
+Window.SetBackgroundTopColor(0, 0, 0); #RGB: 30,50,85
+Window.SetBackgroundBottomColor(0, 0, 0); #RGB: 15,33,64
 
 display_width = Window.GetWidth();
 display_height = Window.GetHeight();
