@@ -32,8 +32,8 @@ sleep 2
 sudo chmod 777 /usr/local/bin/qr-code
 
 
-sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
-sleep 2
+#sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
+#sleep 2
 #sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
 
