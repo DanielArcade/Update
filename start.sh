@@ -1,12 +1,12 @@
  
-#  sudo cp -R /home/arcade/update/.retroarch /home/arcade/.config
+#  sudo cp -R /home/arcade/Update/.retroarch /home/arcade/.config
 # sudo cp -R /home/arcade/pdate/.mame /home/arcade
-# sudo cp -R /home/arcade/update/attract /home/arcade/shared/frontends
+# sudo cp -R /home/arcade/Update/attract /home/arcade/shared/frontends
 # sudo chmod -R 777 /tmp
 # sudo chmod -R 777 /home/arcade/.config
 # sudo chmod -R 777 /home/arcade/shared/frontends
-# sudo cp -r "/home/arcade/update/config.ini" "/home/arcade/.skyscraper"
-#sudo cp -r "/home/arcade/update/pacman.conf" "/etc/pacman.conf"
+# sudo cp -r "/home/arcade/Update/config.ini" "/home/arcade/.skyscraper"
+#sudo cp -r "/home/arcade/Update/pacman.conf" "/etc/pacman.conf"
 #sudo rm -r /var/lib/pacman/db.lck
 #sudo pacman -Sy --noconfirm
 #sudo pacman -S libzip --noconfirm
@@ -20,18 +20,21 @@
 #dialog --infobox "instalando Fbneo..." 10 20
 #sleep 2
 
-#sudo cp -r "/home/arcade/update/flycast" "/usr/local/bin"
+#sudo cp -r "/home/arcade/Update/flycast" "/usr/local/bin"
 #sleep 2
-#sudo cp -r "/home/arcade/update/flycast.png" "/usr/share/pixmaps"
+#sudo cp -r "/home/arcade/Update/flycast.png" "/usr/share/pixmaps"
 #sleep 2
-#sudo cp -r "/home/arcade/update/flycast.desktop" "/usr/share/applications"
+#sudo cp -r "/home/arcade/Update/flycast.desktop" "/usr/share/applications"
 #sleep 2
 #sudo chmod -R 777 /usr/local/bin/flycast
-
+7z x "/home/arcade/Update/attractplus.7z" -o"/home/arcade/Update"
+rm "/home/arcade/Update/attractplus.7z"
+sudo cp "/home/arcade/Update/attractplus" "/usr/local/bin"
+sudo chmod 777 "/usr/local/bin/attractplus"
 
  
-sudo cp -r "/home/arcade/update/qr-code" "/usr/local/bin"
-#sudo mv -f "/home/arcade/update/interactive" "/opt/gasetup/core/procedures"
+sudo cp -r "/home/arcade/Update/qr-code" "/usr/local/bin"
+#sudo mv -f "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
 sleep 2
 sudo chmod 777 /usr/bin/qr-code
 # sudo mkdir /home/arcade/shared/frontends/attract/bkp
@@ -39,21 +42,21 @@ sudo chmod 777 /usr/bin/qr-code
 
 
 
-sudo cp -r "/home/arcade/update/cobranca" "/home/arcade/shared/frontends/attract"
+sudo cp -r "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
 sleep 2
 sudo chmod -R 777 /home/arcade/shared/frontends/attract/cobranca
 
 
-sudo cp -r "/home/arcade/update/teclado" "/usr/local/bin"
-#sudo mv -f "/home/arcade/update/interactive" "/opt/gasetup/core/procedures"
+sudo cp -r "/home/arcade/Update/teclado" "/usr/local/bin"
+#sudo mv -f "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
 sleep 2
 sudo chmod 777 /usr/bin/teclado 
 
 
-#sudo cp -r "/home/arcade/update/attract/startfe.sh" "/opt/galauncher"
-#sudo cp -r "/home/arcade/update/attract/attract" "/usr/bin"
-#sudo cp -r "/home/arcade/update/attractplus" "/usr/local/bin"
-#sudo cp -r "/home/arcade/update/attract/attract" "/usr/share"
+#sudo cp -r "/home/arcade/Update/attract/startfe.sh" "/opt/galauncher"
+#sudo cp -r "/home/arcade/Update/attract/attract" "/usr/bin"
+#sudo cp -r "/home/arcade/Update/attractplus" "/usr/local/bin"
+#sudo cp -r "/home/arcade/Update/attract/attract" "/usr/share"
 #sudo chmod -R 777 /usr/local/bin/attractplus
  
  
@@ -61,10 +64,10 @@ sudo chmod 777 /usr/bin/teclado
 
 
 
-#sudo cp -r "/home/arcade/update/splash.png" /usr/share/plymouth/themes/groovy
+#sudo cp -r "/home/arcade/Update/splash.png" /usr/share/plymouth/themes/groovy
 #sudo plymouth-set-default-theme -R groovy
  
-sudo rm -R /home/arcade/update
+sudo rm -R /home/arcade/Update
 sudo rm -R /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
 #sudo chmod -R 777 /home/arcade/shared/frontends/attract
