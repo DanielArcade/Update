@@ -42,9 +42,14 @@ sleep 2
 sudo chmod 777 /usr/local/bin/teclado 
 
 
-
+sudo cp -r "/home/arcade/Update/groovy.script" /usr/share/plymouth/themes/groovy
+sleep 2
 
 sudo cp -r "/home/arcade/Update/splash.png" /usr/share/plymouth/themes/groovy
+
+
+
+
 sudo plymouth-set-default-theme -R groovy
 
 
@@ -54,7 +59,7 @@ sudo rm -R /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
 #sudo chmod -R 777 /home/arcade/shared/frontends/attract
 dialog --infobox "Reiniciando..." 10 20 
-sleep 10 
+sleep 30 
 clear
 reboot
  
