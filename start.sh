@@ -27,10 +27,7 @@
 #sudo cp -r "/home/arcade/update/flycast.desktop" "/usr/share/applications"
 #sleep 2
 #sudo chmod -R 777 /usr/local/bin/flycast
-7z x "/home/arcade/update/attractplus.7z" -o"/home/arcade/update"
-rm "/home/arcade/update/attractplus.7z"
-sudo cp "/home/arcade/update/attractplus" "/usr/local/bin"
-sudo chmod 777 "/usr/local/bin/attractplus"
+
 
  
 sudo cp -r "/home/arcade/update/qr-code" "/usr/local/bin"
