@@ -38,7 +38,6 @@ sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
-
 sleep 2
 sudo chmod 777 /usr/bin/teclado 
 
