@@ -6,6 +6,18 @@ sudo cp "/home/arcade/Update/attractplus" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus"
 
  
+7z x "/home/arcade/Update/attractplus-kms.7z" -o"/home/arcade/Update"
+rm "/home/arcade/Update/attractplus-kms.7z"
+sudo cp "/home/arcade/Update/attractplus-kms" "/usr/local/bin"
+sudo chmod 777 "/usr/local/bin/attractplus-kms" 
+ 
+ 
+7z x "/home/arcade/Update/attractplus-x11.7z" -o"/home/arcade/Update"
+rm "/home/arcade/Update/attractplus-x11.7z"
+sudo cp "/home/arcade/Update/attractplus-x11" "/usr/local/bin"
+sudo chmod 777 "/usr/local/bin/attractplus-x11" 
+ 
+ 
 sudo cp -r "/home/arcade/Update/qr-code" "/usr/local/bin"
 
 sleep 2
