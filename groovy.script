@@ -152,20 +152,24 @@ Plymouth.SetDisplayNormalFunction(display_normal_callback);
 Plymouth.SetDisplayPasswordFunction(display_password_callback);
 
 #----------------------------------------- Progress Bar --------------------------------
-#----------------------------------------- Progress Bar --------------------------------
+#----------------------------------------- Progress Bar (sem progress_box) --------------------------------
 
-# Removido o progress_box.image e sprite
-
-# Defina posição do progress_bar diretamente, centralizado
 progress_bar.original_image = Image("progress_bar.png");
 progress_bar.sprite = Sprite();
 
-progress_bar.width = display_width / 2;  # ou outro valor proporcional
-progress_bar.height = display_height / 2;
+# Mantém o posicionamento proporcional que antes dependia de progress_box
+# Usamos valores fixos equivalentes ao que era calculado
 
-# Centralizar na tela (exemplo: meio da largura, 75% da altura)
-progress_bar.x = Window.GetX() + display_width / 2 - progress_bar.width / 2;
-progress_bar.y = Window.GetY() + display_height / 2 * 1.5 - progress_bar.height / 2;
+var pb_width = Image("progress_box" + scale_image + ".png").GetWidth() * scale_x;
+var pb_height = Image("progress_box" + scale_image + ".png").GetHeight() * scale_y;
+
+var pb_x = Window.GetX() + display_width / 2 - pb_width / 2;
+var pb_y = Window.GetY() + display_height * 0.75 - pb_height / 2;
+
+progress_bar.x = pb_x + 2 * scale_x * scale_image;
+progress_bar.y = pb_y + 2 * scale_y * scale_image;
+progress_bar.width = pb_width - 4 * scale_x * scale_image;
+progress_bar.height = pb_height - 4 * scale_y * scale_image;
 
 progress_bar.sprite.SetPosition(progress_bar.x, progress_bar.y, 1);
 
