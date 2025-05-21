@@ -161,7 +161,7 @@ progress_bar.original_image = Image("progress_bar.png");
 progress_bar.sprite = Sprite();
 
 progress_bar.width = display_width / 2;  # ou outro valor proporcional
-progress_bar.height = display_height * 0.02;
+progress_bar.height = display_height / 2;
 
 # Centralizar na tela (exemplo: meio da largura, 75% da altura)
 progress_bar.x = Window.GetX() + display_width / 2 - progress_bar.width / 2;
