@@ -167,22 +167,38 @@ mainmenu() {
     serial_arquivo="(nenhum serial encontrado)"
   fi
 
-  # Pede o nome do usuário
-  nome=$(dialog --colors --stdout \
-    --backtitle "Daniel Arcade - Ativação" \
-    --inputbox "\nDigite seu nome para identificação na solicitação de ativação:" 8 50)
+  # Caminho dos arquivos temporários
+  ultimo_envio="/tmp/ult_envio_serial"
+  nome_salvo="/tmp/ult_nome_serial"
 
-  # Verifica se nome foi informado
-  if [ -z "$nome" ]; then
-    dialog --msgbox "Você precisa digitar seu nome para enviar a solicitação." 6 50
-    exit 1
+  enviar_serial=true
+
+  # Se já foi enviado há menos de 60 segundos, pula envio e uso nome salvo
+  if [ -f "$ultimo_envio" ] && [ $(($(date +%s) - $(cat "$ultimo_envio"))) -lt 60 ]; then
+    nome=$(cat "$nome_salvo")
+    enviar_serial=false
+  else
+    # Pede o nome do usuário
+    nome=$(dialog --colors --stdout \
+      --backtitle "Daniel Arcade - Ativação" \
+      --inputbox "\nDigite seu nome para identificação na solicitação de ativação:" 8 50)
+
+    if [ -z "$nome" ]; then
+      dialog --msgbox "Você precisa digitar seu nome para enviar a solicitação." 6 50
+      exit 1
+    fi
+
+    echo "$nome" > "$nome_salvo"
+    date +%s > "$ultimo_envio"
   fi
 
-  # Envia mensagem via Telegram
-  curl -s -X POST "https://api.telegram.org/bot8006750066:AAGnv0-hzq3uDdao9x81BaB3_ljNMA1Fqn4/sendMessage" \
-    -d chat_id=1541182396 \
-    -d parse_mode=Markdown \
-    --data-urlencode $'text=🔐 Solicitação de Ativação\n\n👤 Nome: '"$nome"$'\n\n📄 Serial: '"$serial_arquivo"
+  # Envia mensagem somente se for necessário
+  if [ "$enviar_serial" = true ]; then
+    curl -s -X POST "https://api.telegram.org/bot8006750066:AAGnv0-hzq3uDdao9x81BaB3_ljNMA1Fqn4/sendMessage" \
+      -d chat_id=1541182396 \
+      -d parse_mode=Markdown \
+      --data-urlencode $'text=🔐 Solicitação de Ativação\n\n👤 Nome: '"$nome"$'\n\n📄 Serial: '"$serial_arquivo"
+  fi
 
   # Função para baixar e instalar chave
   worker_baixar_key() {
@@ -200,7 +216,6 @@ mainmenu() {
 
   case "$opcao" in
     1)
-      # Entrada manual do serial
       serial=$(dialog --colors --stdout \
         --backtitle "Daniel Arcade - Ativação" \
         --inputbox "\n\n\ZbSerial atual:\Zn \Z4$serial_arquivo\Zn\n\nDigite o serial de ativação recebido:" 15 60)
@@ -221,6 +236,7 @@ mainmenu() {
       ;;
   esac
   ;;
+
 
 
       "7") execute worker power_atualizar && default=7 ;;
