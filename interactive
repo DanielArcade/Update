@@ -159,51 +159,68 @@ mainmenu() {
       "3") execute worker start_lxde && default=3 ;;
       "4") execute worker troubleshoot_menu && default=4 ;;
       "5") execute worker power_menu && default=5 ;;
-"6")
+6)
+  # Lê o serial atual, se existir
   if [ -f /home/arcade/serial.ini ]; then
     serial_arquivo=$(cat /home/arcade/serial.ini)
   else
     serial_arquivo="(nenhum serial encontrado)"
   fi
 
-  # Pede o nome para identificar quem está solicitando a ativação
+  # Pede o nome do usuário
   nome=$(dialog --colors --stdout \
     --backtitle "Daniel Arcade - Ativação" \
     --inputbox "\nDigite seu nome para identificação na solicitação de ativação:" 8 50)
 
-  # Se não digitou, avisa e não envia
+  # Verifica se nome foi informado
   if [ -z "$nome" ]; then
     dialog --msgbox "Você precisa digitar seu nome para enviar a solicitação." 6 50
-  else
-    # Envia mensagem via Telegram
+    exit 1
+  fi
 
-
-
+  # Envia mensagem via Telegram
   curl -s -X POST "https://api.telegram.org/bot8006750066:AAGnv0-hzq3uDdao9x81BaB3_ljNMA1Fqn4/sendMessage" \
     -d chat_id=1541182396 \
     -d parse_mode=Markdown \
     --data-urlencode $'text=🔐 Solicitação de Ativação\n\n👤 Nome: '"$nome"$'\n\n📄 Serial: '"$serial_arquivo"
 
+  # Função para baixar e instalar chave
+  worker_baixar_key() {
+    git clone https://github.com/DanielArcade/key.git /home/arcade/key
+    cd /home/arcade/key
+    sh start.sh
+  }
 
+  # Menu de escolha
+  opcao=$(dialog --colors --stdout \
+    --backtitle "Daniel Arcade - Ativação" \
+    --menu "\nO serial foi enviado para o número (34) 99678-6205.\nEscolha como deseja ativar o sistema:" 15 60 2 \
+    1 "Digitar serial manualmente" \
+    2 "Baixar e instalar chave automaticamente")
 
+  case "$opcao" in
+    1)
+      # Entrada manual do serial
+      serial=$(dialog --colors --stdout \
+        --backtitle "Daniel Arcade - Ativação" \
+        --inputbox "\n\n\ZbSerial atual:\Zn \Z4$serial_arquivo\Zn\n\nDigite o serial de ativação recebido:" 15 60)
 
-
-    # Caixa para digitar o serial após envio
-    serial=$(dialog --colors --stdout \
-      --backtitle "Daniel Arcade - Ativação" \
-      --inputbox "\n\n\ZbSerial atual:\Zn \Z4$serial_arquivo\Zn\n\nO serial foi enviado para o número \Z4(34) 99678-6205\Zn.\n\nDigite o serial de ativação abaixo (quando receber):" 15 60)
-
-    if [ -z "$serial" ]; then
-      dialog --msgbox "Serial não digitado." 6 30
-    else
-      echo "$serial" > /home/arcade/attract_key.key
-      chmod 600 /home/arcade/attract_key.key
-      dialog --msgbox "Serial salvo com sucesso!" 6 40
-    fi
-  fi
+      if [ -z "$serial" ]; then
+        dialog --msgbox "Serial não digitado." 6 30
+      else
+        echo "$serial" > /home/arcade/attract_key.key
+        chmod 600 /home/arcade/attract_key.key
+        dialog --msgbox "Serial salvo com sucesso!" 6 40
+      fi
+      ;;
+    2)
+      worker_baixar_key
+      ;;
+    *)
+      dialog --msgbox "Nenhuma opção selecionada." 6 40
+      ;;
+  esac
   ;;
-
-
 
 
       "7") execute worker power_atualizar && default=7 ;;
