@@ -36,6 +36,10 @@ sudo chmod 777 /usr/local/bin/qr-code
 #sleep 2
 #sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
+sudo cp "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
+sleep 2
+
+
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
 sleep 2
