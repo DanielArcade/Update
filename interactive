@@ -133,6 +133,52 @@ reboot
 
 
 
+worker_bakup() {
+  #!/usr/bin/env bash
+df -h . | awk '{print $4}' >/tmp/HD.txt
+FILENAME='/tmp/HD.txt'
+I=0
+for LN in $(cat $FILENAME)
+do
+echo "Line number $((I++)) -->  $LN"
+done 
+  
+ 
+sudo mkdir -p '/home/arcade/shared/frontends/attract/bakup'
+
+  
+local default=no  
+  while [ 0 = 0 ]; do  
+  
+  ask_option $default "Espaco ($LN)"  ""  required \
+      1 "Fazer BakUp" \
+      2 "Restaurar BakUp" \
+      3 "Voltar ao Menu" || return
+ 
+    case $ANSWER_OPTION in
+      "1") execute /
+clear 
+sudo cp -r "/home/arcade/shared/frontends/attract/attract.cfg" "/home/arcade/shared/frontends/attract/bakup"
+sudo cp -r "/home/arcade/shared/frontends/attract/configure.ini" "/home/arcade/shared/frontends/attract/bakup"
+sudo cp -R "/home/arcade/shared/frontends/attract/joytokey" "/home/arcade/shared/frontends/attract/bakup"
+sudo chmod -R 777 '/home/arcade/shared/frontends/attract/bakup'
+;; 
+      "2") execute 
+sudo cp -r "/home/arcade/shared/frontends/attract/bakup/attract.cfg" "/home/arcade/shared/frontends/attract"
+sudo cp -r "/home/arcade/shared/frontends/attract/bakup/configure.ini" "/home/arcade/shared/frontends/attract"
+sudo cp -R "/home/arcade/shared/frontends/attract/bakup/joytokey" "/home/arcade/shared/frontends/attract"
+sudo chmod -R 777 '/home/arcade/shared/frontends/attract'
+
+;;
+ 
+      "3") return 0 ;;
+      *) notify "Bad option $ANSWER_OPTION given" ;;
+    esac
+  done
+
+  return 0
+}
+
 
 mainmenu() {
   local default=no
@@ -149,7 +195,8 @@ mainmenu() {
       6 "Ativar por Serial" \
       7 "Update Multijogos" \
       8 "Baixar Roms / Scraper" \
-      9 "Exit to Shell" || ANSWER_OPTION=0
+	  9 "BackUp" \
+      10 "Exit to Shell" || ANSWER_OPTION=0
 
 
 
@@ -238,10 +285,10 @@ mainmenu() {
 
       "7") execute worker power_atualizar && default=7 ;;
       "8") execute worker instal_system && default=8 ;;
+      "9") execute worker_bakup && default=9 ;;
 
 
-
-   "9") break ;; # Sai para o shell
+   "10") break ;; # Sai para o shell
 
 
 
