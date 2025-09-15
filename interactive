@@ -134,32 +134,42 @@ reboot
 
 
 worker_bakup() {
-
-  space_free=$(df -h / | awk 'NR==2 {print $4}')
-
-  sudo mkdir -p '/home/arcade/shared/frontends/attract/bakup'
-
-  local default=no
-  while true; do
-    ask_option $default "Espaço livre ($space_free)" "" required \
+  #!/usr/bin/env bash
+df -h . | awk '{print $4}' >/tmp/HD.txt
+FILENAME='/tmp/HD.txt'
+I=0
+for LN in $(cat $FILENAME)
+do
+echo "Line number $((I++)) -->  $LN"
+done 
+  
+ 
+sudo mkdir '/home/arcade/shared/frontends/attract/bakup'
+  
+local default=no  
+  while [ 0 = 0 ]; do  
+  
+  ask_option $default "Espaco ($LN)"  ""  required \
       1 "Fazer BakUp" \
       2 "Restaurar BakUp" \
       3 "Voltar ao Menu" || return
-
+ 
     case $ANSWER_OPTION in
-      "1")
-        clear
-        sudo cp -r "/home/arcade/shared/frontends/attract/attract.cfg" "/home/arcade/shared/frontends/attract/bakup"
-        sudo cp -r "/home/arcade/shared/frontends/attract/configure.ini" "/home/arcade/shared/frontends/attract/bakup"
-        sudo cp -R "/home/arcade/shared/frontends/attract/joytokey" "/home/arcade/shared/frontends/attract/bakup"
-        sudo chmod -R 755 '/home/arcade/shared/frontends/attract/bakup'
-        ;;
-      "2")
-        sudo cp -r "/home/arcade/shared/frontends/attract/bakup/attract.cfg" "/home/arcade/shared/frontends/attract"
-        sudo cp -r "/home/arcade/shared/frontends/attract/bakup/configure.ini" "/home/arcade/shared/frontends/attract"
-        sudo cp -R "/home/arcade/shared/frontends/attract/bakup/joytokey" "/home/arcade/shared/frontends/attract"
-        sudo chmod -R 755 '/home/arcade/shared/frontends/attract'
-        ;;
+      "1") execute /
+clear 
+sudo cp -r "/home/arcade/shared/frontends/attract/attract.cfg" "/home/arcade/shared/frontends/attract/bakup"
+sudo cp -r "/home/arcade/shared/frontends/attract/configure.ini" "/home/arcade/shared/frontends/attract/bakup"
+sudo cp -R "/home/arcade/shared/frontends/attract/joytokey" "/home/arcade/shared/frontends/attract/bakup"
+sudo chmod -R 777 '/home/arcade/shared/frontends/attract/bakup'
+;; 
+      "2") execute 
+sudo cp -r "/home/arcade/shared/frontends/attract/bakup/attract.cfg" "/home/arcade/shared/frontends/attract"
+sudo cp -r "/home/arcade/shared/frontends/attract/bakup/configure.ini" "/home/arcade/shared/frontends/attract"
+sudo cp -R "/home/arcade/shared/frontends/attract/bakup/joytokey" "/home/arcade/shared/frontends/attract"
+sudo chmod -R 777 '/home/arcade/shared/frontends/attract'
+
+;;
+ 
       "3") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
