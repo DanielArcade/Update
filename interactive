@@ -285,7 +285,7 @@ mainmenu() {
 
       "7") execute worker power_atualizar && default=7 ;;
       "8") execute worker instal_system && default=8 ;;
-      "9") execute worker_bakup && default=9 ;;
+      "9") execute worker worker_bakup && default=9 ;;
 
 
    "10") break ;; # Sai para o shell
