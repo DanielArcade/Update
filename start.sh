@@ -28,8 +28,13 @@ sudo cp "/home/arcade/Update/alerta.wav" "/home/arcade/.attract/sounds"
 
 sudo cp "/home/arcade/Update/configure.ini" "/home/arcade/.attract"
 
-sudo cp "/home/arcade/Update/posikey" "/home/arcade"
-sudo chmod 777 /home/arcade/posikey
+sudo cp "/home/arcade/Update/ocioso.ini" "/home/arcade/.attract"
+
+sudo cp "/home/arcade/Update/countdown.ini" "/home/arcade/.attract"
+
+#sudo cp "/home/arcade/Update/posikey" "/home/arcade"
+
+#sudo chmod 777 /home/arcade/posikey
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
 sudo chmod 777 /usr/local/bin/teclado
