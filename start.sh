@@ -18,32 +18,32 @@ sudo chmod 777 "/usr/local/bin/attractplus-x11"
 
 sudo cp "/home/arcade/Update/qr-code" "/usr/local/bin"
 sudo chmod 777 /usr/local/bin/qr-code
-
+sleep 1
 #sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
 #sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
 sudo cp "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
-
+sleep 1
 sudo cp "/home/arcade/Update/alerta.wav" "/home/arcade/.attract/sounds"
-
-sudo cp "/home/arcade/Update/configure.ini" "/home/arcade/.attract"
-
-sudo cp "/home/arcade/Update/ocioso.ini" "/home/arcade/.attract"
-
-sudo cp "/home/arcade/Update/countdown.ini" "/home/arcade/.attract"
-
+sleep 1
+sudo cp "/home/arcade/Update/configure.ini" "/home/arcade/.attract/config"
+sleep 1
+sudo cp "/home/arcade/Update/ocioso.ini" "/home/arcade/.attract/config"
+sleep 1
+sudo cp "/home/arcade/Update/countdown.ini" "/home/arcade/.attract/config"
+sleep 1
 #sudo cp "/home/arcade/Update/posikey" "/home/arcade"
 
 #sudo chmod 777 /home/arcade/posikey
 
 sudo cp "/home/arcade/Update/teclado" "/usr/local/bin"
 sudo chmod 777 /usr/local/bin/teclado
-
+sleep 1
 sudo cp -r "/home/arcade/Update/groovy.script" /usr/share/plymouth/themes/groovy
 sudo cp -r "/home/arcade/Update/splash.png" /usr/share/plymouth/themes/groovy
-
+sleep 1
 sudo plymouth-set-default-theme -R groovy
-
+sleep 1
 sudo rm -R /home/arcade/Update
 sudo rm -R /home/arcade/.local/share/Trash
 #sudo pacman -Sy --noconfirm
