@@ -26,12 +26,28 @@ sudo cp "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
 sleep 1
 sudo cp "/home/arcade/Update/alerta.wav" "/home/arcade/.attract/sounds"
 sleep 1
-sudo cp "/home/arcade/Update/configure.ini" "/home/arcade/.attract/config"
+sudo cp "/home/arcade/Update/configure.ini" "/home/arcade/shared/frontends/attract/config"
 sleep 1
-sudo cp "/home/arcade/Update/ocioso.ini" "/home/arcade/.attract/config"
+sudo cp "/home/arcade/Update/ocioso.ini" "/home/arcade/shared/frontends/attract/config"
 sleep 1
-sudo cp "/home/arcade/Update/countdown.ini" "/home/arcade/.attract/config"
+sudo cp "/home/arcade/Update/countdown.ini" "/home/arcade/shared/frontends/attract/config"
 sleep 1
+sudo cp "/home/arcade/Update/PosQrCode.ini" "/home/arcade/shared/frontends/attract/config"
+sleep 1
+
+sudo cp "/home/arcade/Update/token.ini" "/home/arcade/shared/frontends/attract/config"
+sleep 1
+
+mkdir -p /home/arcade/shared/frontends/attract/pagar_pix
+
+sleep 1
+
+sudo cp "/home/arcade/Update/pix" "/home/arcade/shared/frontends/attract/"
+
+sudo chmod 777 /home/arcade/shared/frontends/attract/pix
+
+sleep 1
+
 #sudo cp "/home/arcade/Update/posikey" "/home/arcade"
 
 #sudo chmod 777 /home/arcade/posikey
