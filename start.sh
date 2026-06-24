@@ -9,6 +9,9 @@ sleep 1
 rm "/home/arcade/Update/attractplus-kms.7z"
 sudo cp "/home/arcade/Update/attractplus-kms" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus-kms"
+sleep 1
+rm "/home/arcade/shared/frontends/attract/qr-code.cpp"
+sleep 1
 
 7z x "/home/arcade/Update/attractplus-x11.7z" -o"/home/arcade/Update"
 sleep 1
