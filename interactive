@@ -1,10 +1,4 @@
 #!/bin/bash
-
-export HOME=/home/arcade
-export PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
-
-
-
 depend_procedure core base # esp for auto_network, intro and set_clock workers
 VERSION=160
 
@@ -93,29 +87,6 @@ isomainmenu() {
 }
 
 
-#worker_power_atualizar() {
-  #clear
-
- # echo "Atualizando Multijogos..."
-
-  # Cria uma pasta temporária
- #tmpdir=$(mktemp -d)
-
-  # Clona o repositório na pasta temporária
- # git clone https://github.com/DanielArcade/update.git "$tmpdir"
-
-  # Copia somente o conteúdo do repositório para /usr/local/bin
-  #sudo cp -r "$tmpdir"/* /usr/local/bin/
-
-  # Remove a pasta temporária
- # rm -rf "$tmpdir"
-
-  # Atualiza o initramfs (se necessário)
- # sudo mkinitcpio -P
-
-  # Reinicia o sistema
- # sudo reboot
-#}
 
 
 worker_power_atualizar() {
@@ -133,15 +104,15 @@ reboot
 
 
 
-worker_bakup() {
+worker_backup() {
     space_free=$(df -h / | awk 'NR==2 {print $4}')
-    sudo mkdir -p '/home/arcade/shared/frontends/attract/bakup'
+    sudo mkdir -p '/home/arcade/shared/frontends/attract/config/backup'
 
     local default=no
     while true; do
         ask_option $default "Espaço livre ($space_free)" "" required \
-            1 "Fazer BakUp" \
-            2 "Restaurar BakUp" \
+            1 "Fazer Backup" \
+            2 "Restaurar Backup" \
             3 "Voltar ao Menu" || return
 
         case $ANSWER_OPTION in
@@ -149,27 +120,45 @@ worker_bakup() {
                 # Backup com barra de progresso
                 {
                     echo "10" ; echo "Copiando attract.cfg..."
-                    sudo cp -r "/home/arcade/shared/frontends/attract/attract.cfg" "/home/arcade/shared/frontends/attract/bakup"
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/attract.cfg" "/home/arcade/shared/frontends/attract/config/backup"
+
                     echo "50" ; echo "Copiando configure.ini..."
-                    sudo cp -r "/home/arcade/shared/frontends/attract/configure.ini" "/home/arcade/shared/frontends/attract/bakup"
-                    echo "80" ; echo "Copiando joytokey..."
-                    sudo cp -R "/home/arcade/shared/frontends/attract/joytokey" "/home/arcade/shared/frontends/attract/bakup"
-                    echo "100" ; echo "Backup concluído!"
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/configure.ini" "/home/arcade/shared/frontends/attract/config/backup"
+
+                    echo "80" ; echo "Copiando countdown.ini..."
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/countdown.ini" "/home/arcade/shared/frontends/attract/config/backup"
+
+                    echo "110" ; echo "Copiando ocioso.ini..."
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/ocioso.ini" "/home/arcade/shared/frontends/attract/config/backup"
+
+                    echo "140" ; echo "Copiando joytokey..."
+                    sudo cp -R "/home/arcade/shared/frontends/attract/joytokey" "/home/arcade/shared/frontends/attract/config/backup"
+
+                    echo "170" ; echo "Backup concluído!"
                 } | dialog --title "Backup" --gauge "Processando..." 10 60 0
-                sudo chmod -R 755 '/home/arcade/shared/frontends/attract/bakup'
+                sudo chmod -R 755 '/home/arcade/shared/frontends/attract/config/backup'
                 ;;
             "2")
                 # Restaurar com barra de progresso
                 {
                     echo "10" ; echo "Restaurando attract.cfg..."
-                    sudo cp -r "/home/arcade/shared/frontends/attract/bakup/attract.cfg" "/home/arcade/shared/frontends/attract"
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/backup/attract.cfg" "/home/arcade/shared/frontends/attract/config"
+
                     echo "50" ; echo "Restaurando configure.ini..."
-                    sudo cp -r "/home/arcade/shared/frontends/attract/bakup/configure.ini" "/home/arcade/shared/frontends/attract"
-                    echo "80" ; echo "Restaurando joytokey..."
-                    sudo cp -R "/home/arcade/shared/frontends/attract/bakup/joytokey" "/home/arcade/shared/frontends/attract"
-                    echo "100" ; echo "Restauração concluída!"
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/backup/configure.ini" "/home/arcade/shared/frontends/attract/config"
+
+                    echo "80" ; echo "Restaurando countdown.ini..."
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/backup/countdown.ini" "/home/arcade/shared/frontends/attract/config"
+
+                    echo "110" ; echo "Restaurando ocioso.ini..."
+                    sudo cp -r "/home/arcade/shared/frontends/attract/config/backup/ocioso.ini" "/home/arcade/shared/frontends/attract/config"
+
+                    echo "140" ; echo "Restaurando joytokey..."
+                    sudo cp -R "/home/arcade/shared/frontends/attract/config/backup/joytokey" "/home/arcade/shared/frontends/attract"
+
+                   echo "170" ; echo "Restauração concluída!"
                 } | dialog --title "Restauração" --gauge "Processando..." 10 60 0
-                sudo chmod -R 755 '/home/arcade/shared/frontends/attract'
+                sudo chmod -R 755 '/home/arcade/shared/frontends/attract/config'
                 ;;
             "3") return 0 ;;
             *) notify "Bad option $ANSWER_OPTION given" ;;
@@ -178,13 +167,14 @@ worker_bakup() {
 }
 
 
+
 mainmenu() {
   local default=no
   local_ip=$(ip -br a | grep UP | tr -s '[:space:]' | cut -d ' ' -f 3 | cut -d '/' -f 1 | tr '\n' ' ' | sed -E 's/(.*)[[:space:]]+/\1/')
-  space_left="$(df --output=pcent / | tail -1 | grep -oE '[0-9]+')"
+  space_used="$(df --output=pcent / | tail -1 | grep -oE '[0-9]+')"
 
-  while true; do
-    ask_option "$default" "$(hostnamectl hostname) ($local_ip) - ${space_left}% livre em /" "Setup Groovy Arcade Linux" required \
+  while [ 0 = 0 ]; do
+    ask_option $default "$(hostnamectl hostname) ($local_ip) - ${space_used}% used on /" "Setup Groovy Arcade Linux" required \
       1 "Start Front-End" \
       2 "Setup (video, audio, network, etc.)" \
       3 "Desktop" \
@@ -192,9 +182,8 @@ mainmenu() {
       5 "Reboot / PowerOff / Suspend" \
       6 "Ativar por Serial" \
       7 "Update Multijogos" \
-      8 "Baixar Roms / Scraper" \
       9 "BackUp" \
-      10 "Exit to Shell" || ANSWER_OPTION=0
+      10 "Exit to Shell" || ANSWER_OPTION=10
 
     case $ANSWER_OPTION in
       "1") execute worker start_fe && default=1 ;;
@@ -202,6 +191,7 @@ mainmenu() {
       "3") execute worker start_lxde && default=3 ;;
       "4") execute worker troubleshoot_menu && default=4 ;;
       "5") execute worker power_menu && default=5 ;;
+
       "6")
         # Serial Activation
         ultimo_envio="/tmp/ult_envio_serial"
@@ -214,13 +204,16 @@ mainmenu() {
         fi
 
         enviar_serial=true
+
         if [ -f "$ultimo_envio" ] && [ $(($(date +%s) - $(cat "$ultimo_envio"))) -lt 60 ]; then
           nome=$(cat "$nome_salvo")
           enviar_serial=false
         else
           nome=$(dialog --colors --stdout --backtitle "Daniel Arcade - Ativação" \
             --inputbox "\nDigite seu nome para identificação na solicitação de ativação:" 8 50)
+
           [ -z "$nome" ] && dialog --msgbox "Nome não digitado. Voltando ao menu principal." 6 50 && continue
+
           echo "$nome" > "$nome_salvo"
           date +%s > "$ultimo_envio"
         fi
@@ -232,7 +225,6 @@ mainmenu() {
             --data-urlencode $'text=🔐 Solicitação de Ativação\n\n👤 Nome: '"$nome"$'\n\n📄 Serial: '"$serial_arquivo"
         fi
 
-        # Escolha de ativação
         worker_baixar_key() {
           git clone https://github.com/DanielArcade/key.git /home/arcade/key
           cd /home/arcade/key
@@ -248,6 +240,7 @@ mainmenu() {
           1)
             serial=$(dialog --colors --stdout --backtitle "Daniel Arcade - Ativação" \
               --inputbox "\n\n\ZbSerial atual:\Zn \Z4$serial_arquivo\Zn\n\nDigite o serial de ativação recebido:" 15 60)
+
             if [ -n "$serial" ]; then
               echo "$serial" > /home/arcade/attract_key.key
               chmod 600 /home/arcade/attract_key.key
@@ -256,16 +249,19 @@ mainmenu() {
               dialog --msgbox "Serial não digitado." 6 30
             fi
             ;;
-          2) worker_baixar_key ;;
-          *) dialog --msgbox "Nenhuma opção selecionada." 6 40 ;;
+          2)
+            worker_baixar_key
+            ;;
+          *)
+            dialog --msgbox "Nenhuma opção selecionada." 6 40
+            ;;
         esac
         ;;
-      "7") execute worker power_atualizar && default=7 ;;
-      "8") execute worker instal_system && default=8 ;;
-      "9") worker_bakup && default=9 ;;
 
-      "10") break ;;  # Sai para o shell
-      *) break ;;      # Opção inválida ou cancelada
+      "7") execute worker power_atualizar && default=7 ;;
+      "9") worker_backup && default=9 ;;
+      "10") break ;;
+      *) execute worker abort_installer ;;
     esac
   done
 
@@ -273,6 +269,9 @@ mainmenu() {
 }
 
 
+booted_on_iso() {
+  [[ $(findmnt -no source /) == "airootfs" ]]
+}
 
 check_for_home() {
   if [ ! -d "/mnt/gahome" ]; then
@@ -367,18 +366,24 @@ worker_system_menu() {
       2 "Language/Keyboard" \
       3 "SwitchRes manual settings" \
       4 "GroovyMAME manual settings" \
-      6 "Return to Main" || return
-#      5 "AdvanceMenuPlus manual settings" \
+      5 "Kernel boot parameters" \
+      6 "Select a different kernel" \
+      7 "Change bootloader" \
+      8 "Return to Main" || return
 
-    case $ANSWER_OPTION in
-      "1") execute worker select_passwd && default=2 ;;
-      "2") execute worker select_language_menu && default=3 ;;
-      "3") execute worker edit_switchres && default=4 ;;
-      "4") execute worker edit_mame && default=5 ;;
-      "5") execute worker edit_advmenu && default=6 ;;
-      "6") return 0 ;;
+    line_selected="$ANSWER_OPTION"
+    case $line_selected in
+      "1") execute worker select_passwd ;;
+      "2") execute worker select_language_menu ;;
+      "3") execute worker edit_switchres ;;
+      "4") execute worker edit_mame ;;
+      "5") execute worker edit_kernel_parameters ;;
+      "6") execute worker select_kernel ;;
+      "7") execute worker select_bootloader ;;
+      "8") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
+    default="$(($line_selected + 1))"
   done
   return 0
 }
@@ -397,18 +402,22 @@ worker_setup_menu() {
       9 "System Setup" \
       10 "Emulators setup" \
       11 "Return to Main" || return
-      #6 "Add ROM Path" \
-      #7 "Add Snap Path" \
 
     case $ANSWER_OPTION in
       "1") execute worker video_menu && default=2 ;;
       "2") execute worker audio_menu && default=3 ;;
       "3") execute worker network_menu && default=4 ;;
       "4") execute worker joystick_menu && default=5 ;;
-      "5") execute worker select_and_install_frontend $(get_config_value "$GA_CONF" video.backend)&& default=6 ;;
-      #"6") execute worker MakeRSCache roms && default=7 ;;
-      #"7") execute worker MakeRSCache snaps && default=8 ;;
-      #"8") execute worker extras_menu && default=9 ;;
+      "5") 
+        # Check for internet connection to decide which frontend menu to load
+        if ping -c 1 -W 2 archlinux.org &>/dev/null; then
+          execute worker select_and_install_frontend $(get_config_value "$GA_CONF" video.backend) && default=6
+        else
+          inform "Offline mode: Showing only installed Front-Ends."
+          sleep 2
+          execute worker select_frontend && default=6
+        fi
+        ;;
       "8") execute worker system_packages_menu && default=9 ;;
       "9") execute worker system_menu && default=10 ;;
       "10") execute worker emulators_menu && default=11 ;;
@@ -438,9 +447,9 @@ worker_select_language_menu() {
   local default=no
   while [ 0 = 0 ]; do
     ask_option $default "Language Menu" "Setup Language/Keyboard" required \
-      1 "Auto detect both" \
-      2 "Locale" \
-      3 "Keyboard" \
+      1 "Auto detect (Requires Internet)" \
+      2 "Select Locale (Language)" \
+      3 "Select Keyboard Layout" \
       4 "Return to Main" || return
 
     case $ANSWER_OPTION in
@@ -451,51 +460,157 @@ worker_select_language_menu() {
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
   done
-
   return 0
 }
 
 worker_select_locale() {
-  # /usr/share/i18n/SUPPORTED
   if [ -f "/home/arcade/1" ]; then
     notify "You can only change the language on an installed system. Not in the LiveCD"
     return 1
   fi
-  notify "See /usr/share/i18n/SUPPORTED for supported locales"
-  nano -R /etc/locale.gen
-  nano -R /etc/locale.conf
-  inform "Generating new locales You will need to reboot for the changes to take effect."
-  LOCALE=$(cat /etc/locale.conf | sed -e "s/#.*//g")
-  locale-gen -a
-  localectl set-locale $LOCALE
-  #notify "You will need to set LANG or LOCALE environment variables in ~/.bash_profile"
+
+  inform "Generating available locales list..."
+  
+  local locales_array=()
+  for loc in $(grep -i "UTF-8" /etc/locale.gen | sed 's/^[ \t]*#//g' | awk '{print $1}'); do
+    if [ -n "$loc" ]; then
+      locales_array+=("$loc" "-")
+    fi
+  done
+
+  if [ ${#locales_array[@]} -eq 0 ]; then
+     notify "Error: Could not read /etc/locale.gen"
+     return 1
+  fi
+
+  ask_option "no" "Select Locale" "Choose your system language" required "${locales_array[@]}" || return 1
+  SELECTED_LOCALE=$ANSWER_OPTION
+
+  log_info "Setting locale to $SELECTED_LOCALE"
+
+  sed -i "s/^#\?[ \t]*${SELECTED_LOCALE}/${SELECTED_LOCALE}/" /etc/locale.gen
+  
+  inform "Generating locales (this may take a while)..."
+  locale-gen >/dev/null 2>&1
+
+  localectl set-locale LANG=$SELECTED_LOCALE
+  
+  echo "LANG=$SELECTED_LOCALE" > /etc/locale.conf
+  
+  notify "Language set to $SELECTED_LOCALE.\nPlease reboot the machine to apply to all menus."
   return 0
 }
 
 worker_select_keyboard() {
-  CURKEYMAP=$(cat /etc/vconsole.conf | grep KEYMAP= | sed -e 's/KEYMAP=//g' | sed -e 's/\=//g')
+  inform "Loading global keyboard list..."
+  
+  local kbd_options=(
+    "af"                   "Afghanistan"
+    "al"                   "Albania"
+    "ara"                  "Arabic"
+    "la-latin1"            "Argentina / Latin America / Mexico"
+    "am"                   "Armenia"
+    "us"                   "Australia / China / US"
+    "az"                   "Azerbaijan"
+    "bd"                   "Bangladesh"
+    "by"                   "Belarus"
+    "be-latin1"            "Belgium"
+    "ba"                   "Bosnia & Herzegovina"
+    "br-abnt"              "Brazil (ABNT)"
+    "br-abnt2"             "Brazil (ABNT2)"
+    "bg"                   "Bulgaria"
+    "cf"                   "Canada (French)"
+    "ca-multi"             "Canada (Multilingual)"
+    "croat"                "Croatia"
+    "cz-qwerty"            "Czech Republic (QWERTY)"
+    "cz-qwertz"            "Czech Republic (QWERTZ)"
+    "dk-latin1"            "Denmark"
+    "et"                   "Estonia"
+    "fi-latin1"            "Finland"
+    "fr-latin1"            "France"
+    "fr-bepo"              "France (Bepo)"
+    "fr-mac"               "France (Mac)"
+    "ge_la"                "Georgia"
+    "de-latin1"            "Germany"
+    "de-latin1-nodeadkeys" "Germany (Nodeadkeys)"
+    "gr"                   "Greece"
+    "il"                   "Hebrew / Israel"
+    "hu101"                "Hungary"
+    "is-latin1"            "Iceland"
+    "in"                   "India"
+    "ir"                   "Iran"
+    "ie"                   "Ireland"
+    "it"                   "Italy"
+    "it-mac"               "Italy (Mac)"
+    "jp106"                "Japan"
+    "kz"                   "Kazakhstan"
+    "kr"                   "Korea"
+    "lv-latin4"            "Latvia"
+    "lt"                   "Lithuania"
+    "mk"                   "Macedonia"
+    "mt"                   "Malta"
+    "nl"                   "Netherlands"
+    "no-latin1"            "Norway"
+    "pl"                   "Poland"
+    "pt-latin1"            "Portugal"
+    "pt-mac"               "Portugal (Mac)"
+    "ro"                   "Romania"
+    "ru"                   "Russia"
+    "sr-cy"                "Serbia (Cyrillic)"
+    "sr-latin"             "Serbia (Latin)"
+    "sk-qwertz"            "Slovakia"
+    "slovene"              "Slovenia"
+    "es"                   "Spain"
+    "sv-latin1"            "Sweden"
+    "sf-latin1"            "Switzerland (French)"
+    "sg-latin1"            "Switzerland (German)"
+    "sy"                   "Syria"
+    "tw"                   "Taiwan"
+    "th"                   "Thailand"
+    "trf"                  "Turkey (F)"
+    "trq"                  "Turkey (Q)"
+    "ua"                   "Ukraine"
+    "uk"                   "United Kingdom"
+    "uk-mac"               "United Kingdom (Mac)"
+    "dvorak"               "United States (Dvorak)"
+    "us-acentos"           "United States (Intl)"
+    "Other"                "Type manually"
+  )
 
-  ask_string "Set keymap:" "$CURKEYMAP" || return 1
+  CURKEYMAP=$(localectl status 2>/dev/null | grep "Keymap" | awk '{print $3}')
+  [ -z "$CURKEYMAP" ] && CURKEYMAP="us"
 
-  KEYMAP=${ANSWER_STRING// /}
+  ask_option "$CURKEYMAP" "Select Keymap" "Current System Keymap: $CURKEYMAP" required "${kbd_options[@]}" || return 1
+  
+  KEYMAP=$ANSWER_OPTION
 
-  cat $CONFIG_FILE | sed -e 's/keymap=.*//g' | grep -v ^$ >${CONFIG_FILE_TMP}
-  mv ${CONFIG_FILE_TMP} ${CONFIG_FILE}
-  echo "keymap=$KEYMAP" >>$CONFIG_FILE
-  ##sed -ri "s/^KEYMAP=.*/KEYMAP=$KEYMAP/" /etc/vconsole.conf
-  ask_yesno "Change current keymap from $CURKEYMAP to $KEYMAP? $keymaplocale" || return 1
-  rm /tmp/keymaps
-  cat /etc/vconsole.conf | grep KEYMAP= >>/tmp/keymaps
-  cp -f /tmp/keymaps $CONFIG_DIR
-  chown arcade.nobody "$CONFIG_DIR" keymaps
-  #localectl set-keymap $CURKEYMAP
+  if [ "$KEYMAP" = "Other" ]; then
+      ask_string "Type keymap code (ex: us, br-abnt2):" "$CURKEYMAP" || return 1
+      KEYMAP=${ANSWER_STRING// /}
+  fi
+
+  [ -z "$KEYMAP" ] && KEYMAP="us"
+
+  log_info "Applying keymap: $KEYMAP"
+
   localectl set-keymap $KEYMAP
-  KM=$(localectl)
-  inform "$KM"
-  sleep 5
+  loadkeys $KEYMAP 2>/dev/null
+
+  set_config_value "$CONFIG_FILE" "keymap" "$KEYMAP"
+
+  if [ ! -f /etc/vconsole.conf ] || ! grep -q "KEYMAP=$KEYMAP" /etc/vconsole.conf; then
+      echo "KEYMAP=$KEYMAP" > /etc/vconsole.conf
+  fi
+
+  if [ -f /etc/vconsole.conf ]; then
+      cat /etc/vconsole.conf | grep KEYMAP= > /tmp/keymaps
+      cp -f /tmp/keymaps "$CONFIG_DIR"
+      chown arcade.nobody "$CONFIG_DIR/keymaps" 2>/dev/null
+  fi
+
+  notify "Keyboard successfully configured to: $KEYMAP"
   return 0
 }
-
 
 worker_autodetect_locale() {
   auto_configure_localization
@@ -507,8 +622,6 @@ worker_file_manager() {
 }
 
 worker_start_fe() {
-  # Multiple FE are not yet handled, but forcing FE= would be nice
-  #su arcade -c startx -- -nocursor vt7 &>/dev/null
   clear
   tput civis
   su arcade -c /opt/galauncher/startfe.sh &>/dev/null
@@ -516,7 +629,6 @@ worker_start_fe() {
 }
 
 worker_start_lxde() {
-# Multiple FE are not yet handled, but forcing FE= would be nice
   FE=lxde su arcade -c startx -- vt7 > /dev/null
 }
 
@@ -545,7 +657,6 @@ worker_power_action() {
   action="${1,,}"
   ask_yesno "Really $action system?" || return
   systemctl $action
-  # brutal logoff, can't do any other way
   pkill -KILL -u $(whoami)
 }
 
@@ -591,31 +702,14 @@ previous_setup() {
   if [ "$PASSVALUE" != "" ]; then
     echo arcade:$PASSVALUE | chpasswd
     echo root:$PASSVALUE | chpasswd
-    #/opt/webmin/changepass.pl /etc/webmin admin $PASSVALUE
   fi
-  # Network setup
-  ###############if [ -f "$CONFIG_DIR/net" ]; then
-  ###########cp -f $CONFIG_DIR/net /etc/conf.d/
-  ###############fi
-  ###############if [ -f "$CONFIG_DIR/wpa_supplicant.conf" ]; then
-  ###########cp -f $CONFIG_DIR/wpa_supplicant.conf /etc/wpa_supplicant/
-  ###############fi
-  ###############NETCFG=$(grep network= $CONFIG_FILE)
-  ###############NETVALUE=$(echo $NETCFG | awk -F = '{print $2}')
-  ###############if [ "$NETVALUE" != "" ]; then
-  ###########ln -s /etc/init.d/net.lo /etc/init.d/net.${NETVALUE}
-  ###########rc-update add net.${NETVALUE} default
-  ###########/etc/init.d/net.${NETVALUE} start
-  ###########/etc/init.d/sshd restart
-  ###############fi
-  # X Windows
+  
   if [ -f "$CONFIG_DIR/xorg.conf" ]; then
     cp -f $CONFIG_DIR/xorg.conf /etc/X11/
   fi
   # keymap
   if [ -f "$CONFIG_DIR/keymaps" ]; then
     CURKEYMAP=$(cat /etc/vconsole.conf | grep KEYMAP= | sed -e 's/KEYMAP=//g' | sed -e 's/\=//g')
-    ##cp -f $CONFIG_DIR/keymaps /etc/vconsole.conf
     localectl set-keymap $CURKEYMAP
   fi
   return 0
@@ -687,26 +781,19 @@ worker_pre_install() {
 
   SETUP=1
 
-  # When booting a DVD, /run/archiso/bootmnt/ is mounted
-  # When booting a USK key, not necessarily and it will cause pain later. So fix that
   if [[ ! -d /run/archiso/bootmnt/ ]] ; then
-    isolabel="$(cat /proc/cmdline | grep -oE "archisolabel=GA_[0-9_.]+" | cut -d '=' -f 2)"
-    mkdir /run/archiso/bootmnt
-    # Mounting an iso file, so mount it RO to avoid a warning
+    mkdir -p /run/archiso/bootmnt
+    isolabel="$(blkid | grep -oE 'LABEL="GA_20[0-9]{2}[_.][0-9]{2}' | cut -d '"' -f2)"
     mount -L "$isolabel" /run/archiso/bootmnt/ -o ro
   fi
 
-  # Get default kernel commandline, necessary for bootloaders
   tmp_val="$(grep "KERNEL_DEFAULT_CMDLINE=" /run/archiso/bootmnt/boot/syslinux/syslinux.cfg)"
   default_cmdline=${tmp_val#*KERNEL_DEFAULT_CMDLINE=}
-  # Get kernel parameters from ga.conf
-  if [[ -f $CONFIG_FILE ]] && grep -q "^kernel_video_cmdline=" "$CONFIG_FILE"; then
-    tmp_val="$(grep "^kernel_video_cmdline=" "$CONFIG_FILE")"
-    kernel_video_params=${tmp_val#*kernel_video_cmdline=}
+  if [[ -f "$GA_CONF" ]] && grep -q "^kernel_video_cmdline=" "$GA_CONF"; then
+    tmp_val="$(grep "^kernel_video_cmdline=" "$GA_CONF")"
+    export kernel_video_params="${tmp_val#*kernel_video_cmdline=}"
   fi
-  # Both $default_cmdline and $kernel_video_params ill be used from lib_install.sh
-  # to configure the bootloader
-
+  
   RAN_AUTOPART=no
   execute worker select_and_partition_disk || return 1
   RAN_AUTOPART=yes
@@ -714,22 +801,22 @@ worker_pre_install() {
 
 
 worker_post_install() {
-  # Then copy /etc/switchres.ini shared/configs/mame/mame.ini shared/configs/ga.conf
   cp /etc/switchres.ini /groovyarcade/etc
   cp /home/arcade/shared/configs/mame/mame.ini /groovyarcade/home/arcade/shared/configs/mame/
   cp /home/arcade/shared/configs/ga.conf /groovyarcade/home/arcade/shared/configs/ga.conf
   mkdir -p /groovyarcade/{dev,proc,sys,tmp,run,mnt,media}
   rm -f /groovyarcade/home/arcade/1
   rm -Rf /groovyarcade/home/arcade/lost+found /groovyarcade/home/roms/lost+found
-  # We need to keep the stable/testing repos in sync with the ISO, otherwise
-  # kernels may differ and make the install boot freeze
   cp /etc/pacman.d/groovy-ux-repo.conf /groovyarcade/etc/pacman.d/groovy-ux-repo.conf
-  # This is for udiskie.serice, as we can't enable it from chroot
   install -Dm644 -o arcade -g arcade /home/arcade/.config/systemd/user/udiskie.service /groovyarcade/home/arcade/.config/systemd/user/udiskie.service
   cp -vrp /home/arcade/.config/systemd/user/default.target.wants /groovyarcade/home/arcade/.config/systemd/user/
 
   cat >/groovyarcade/home/arcade/.bash_profile <<'EOF'
 #!/bin/bash
+
+if [[ -f ~/.bashrc ]] ; then
+    . ~/.bashrc
+fi
 
 if [[ $(tty) == /dev/tty1 ]] ; then
     sudo setterm --powerdown 0 --blank 0
@@ -740,29 +827,26 @@ fi
 EOF
   chown -R arcade:arcade /groovyarcade/home/arcade
 
-  # Create fstab -> read https://wiki.archlinux.org/index.php/Installation_guide#Fstab some day
   genfstab -U /groovyarcade > /groovyarcade/etc/fstab
 
   alsactl store
   cp /var/lib/alsa/asound.state /groovyarcade/var/lib/alsa/
 
-  ## CHROOT: last bits of configuration on the destination drive
   inform "Final configuration steps"
   arch-chroot /groovyarcade /bin/bash --login <<CHROOTED
     cd /root/
     systemd-machine-id-setup
     locale-gen -a
     [[ ! -d $(pacman-conf --config="/etc/pacman.conf" gpgdir) ]] && (sudo pacman-key --init && sudo pacman-key --populate archlinux)
-    [[ ! -d /sys/firmware/efi/efivars ]] && syslinux-install_update -i -a -m
     mv /etc/mkinitcpio-installed.conf /etc/mkinitcpio.conf
 
     [[ -f /etc/systemd/journald.conf.d/volatile-storage.conf ]] && rm /etc/systemd/journald.conf.d/volatile-storage.conf
     mkdir -p /var/log/journal
     systemd-tmpfiles --create --prefix /var/log/journal
 
-    systemctl disable choose-mirror.service livecd-alsa-unmuter.service
+    systemctl disable choose-mirror.service livecd-alsa-unmuter.service reflector.service
+    systemctl enable reflector.timer
     rm -r /etc/systemd/system/{choose-mirror.service,etc-pacman.d-gnupg.mount}
-    su - arcade -c "systemctl --user enable udiskie"
 
     plymouth-set-default-theme -R groovy
     rm /etc/mkinitcpio-dvd.conf
@@ -770,56 +854,161 @@ EOF
     rm /usr/lib/systemd/system/multi-user.target.wants/plymouth-quit*
 CHROOTED
 
-  # Set a working network interface for the network monitor in LXDE
-  # But the file doesn't exist yet
-  #iface=$(ip -br -c addr show | grep "UP" | head -1 | awk '{print $1}')
-  #[[ -n $iface ]] && set_config_value /groovyarcade/home/arcade/.config/lxpanel-default/LXDE/panels/panel iface "$iface"
+  arch-chroot -u arcade /groovyarcade /bin/bash --login <<CHROOTED
+    mkdir -p /home/arcade/.config/systemd/user/default.target.wants
+    ln -s /home/arcade/.config/systemd/user/udiskie.service /home/arcade/.config/systemd/user/default.target.wants/
+CHROOTED
+
+  install_LIMINE
+  configure_boot_loader LIMINE
+
+  DIR_PENDRIVE="/run/archiso/bootmnt/shared"
+  DIR_DESTINATION="/groovyarcade/home/arcade/shared"
+  
+  if [ -d "$DIR_PENDRIVE" ]; then
+      if ask_yesno "A 'shared' folder was found on your USB drive.\nDo you want to copy its contents to your hard drive now?\n(This will overwrite existing files)"; then
+          inform "Preparing to copy shared files..."
+          mkdir -p "$DIR_DESTINATION"
+          
+          TOTAL_FILES=$(find "$DIR_PENDRIVE" -type f | wc -l)
+          if [ "$TOTAL_FILES" -gt 0 ]; then
+              (
+                  COUNT=0
+                  find "$DIR_PENDRIVE" -type f | while IFS= read -r FILE; do
+                      REL_PATH="${FILE#$DIR_PENDRIVE/}"
+                      mkdir -p "$DIR_DESTINATION/$(dirname "$REL_PATH")"
+                      cp -f "$FILE" "$DIR_DESTINATION/$REL_PATH" 
+                      COUNT=$((COUNT + 1))
+                      PERCENT=$((COUNT * 100 / TOTAL_FILES))
+                      echo "$PERCENT"
+                  done
+              ) | dialog --title "Copying Shared Files" --gauge "Copying files to /home/arcade/shared...\nPlease wait, this may take a while." 10 70
+          else
+              cp -rf "$DIR_PENDRIVE"/* "$DIR_DESTINATION/" 2>/dev/null
+          fi
+          
+          arch-chroot /groovyarcade chown -R arcade:arcade /home/arcade/shared
+          notify "Shared folder copy completed successfully!"
+      fi
+  fi
+
+  # --- APPLY VIDEO PROFILES (CRT/LCD) ---
+  # Read the chosen monitor from the LiveCD's active ga.conf ($GA_CONF)
+  local current_monitor=$(get_config_value "$GA_CONF" monitor)
+  [[ -z "$current_monitor" ]] && current_monitor="lcd"
+  
+  inform "Applying video profiles for $current_monitor..."
+
+  local is_lcd=0
+  if [[ "$current_monitor" == "lcd" || "$current_monitor" == "vesa"* ]]; then
+      is_lcd=1
+  fi
+
+  # Templates are located in the LiveCD filesystem
+  local template_dir="/opt/gasetup/core/configs"
+  
+  # Target files are located in the newly installed Hard Drive
+  local target_dir="/groovyarcade/home/arcade/shared/configs"
+  local profiles=()
+
+  # Define which templates to use based on the selected monitor type
+  if [[ $is_lcd == 1 ]]; then
+      profiles=(
+          "$template_dir/groovymame/mame_lcd.ini|$target_dir/mame/mame.ini|yes"
+          "$template_dir/retroarch/retroarch_lcd.cfg|$target_dir/retroarch/retroarch.cfg|no"
+          "$template_dir/flycast/emu_lcd.cfg|$target_dir/flycast/emu.cfg|no"
+      )
+  else
+      profiles=(
+          "$template_dir/groovymame/mame_crt.ini|$target_dir/mame/mame.ini|yes"
+          "$template_dir/retroarch/retroarch_crt.cfg|$target_dir/retroarch/retroarch.cfg|no"
+          "$template_dir/flycast/emu_crt.cfg|$target_dir/flycast/emu.cfg|no"
+      )
+  fi
+
+  # Loop through the profiles and inject the configurations into the HDD files
+  for prof in "${profiles[@]}"; do
+      local profile="${prof%%|*}"
+      local rest="${prof#*|}"
+      local target="${rest%%|*}"
+      local is_mame="${rest#*|}"
+
+      # Skip if the source template or the target config file does not exist
+      [[ ! -f "$profile" || ! -f "$target" ]] && continue
+
+      while IFS= read -r line || [[ -n "$line" ]]; do
+          [[ -z "$line" ]] && continue
+
+          if [[ "$is_mame" == "yes" ]]; then
+              local key=$(echo "$line" | awk '{print $1}')
+              local val=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//')
+              
+              # Special override for MAME monitor variable if CRT is selected
+              if [[ "$key" == "monitor" && "$is_lcd" == "0" ]]; then
+                  val="$current_monitor"
+              fi
+              
+              if grep -qE "^[[:space:]]*${key}[[:space:]]+" "$target" ; then
+                  sed -i -E "s/^[[:space:]]*${key}[[:space:]]+.*/${key}                  ${val}/" "$target"
+              else
+                  echo "${key}                  ${val}" >> "$target"
+              fi
+          else
+              local key=$(echo "$line" | cut -d '=' -f 1 | tr -d ' ')
+              local val=$(echo "$line" | cut -d '=' -f 2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
+              
+              if grep -qE "^[[:space:]]*${key}[[:space:]]*=" "$target" ; then
+                  sed -i -E "s/^[[:space:]]*${key}[[:space:]]*=.*/${key} = ${val}/" "$target"
+              else
+                  echo "${key} = ${val}" >> "$target"
+              fi
+          fi
+      done < "$profile"
+  done
+  # --------------------------------------
+
+  if ask_yesno "Installation almost finished.\nDo you want to create a Swap file on your hard drive now?\n(Recommended for systems with low RAM)"; then
+      inform "Creating swap file... This may take a moment."
+      if ! swapsize="$(decide_swap_size)" ; then
+          log_warn "Failed to get swap size, force it to 4G"
+          swapsize=4
+      fi
+      
+      mkswap -U 0657FD6D-A4AB-43C4-84E5-0933C84B4F4F --size ${swapsize}G --file /groovyarcade/.swapfile
+      notify "Swap file created successfully!"
+  fi
+  
   ask_yesno "Installation finished, Do you want to reboot? (remove CDROM afterwards)" || DOING_INSTALL=0 return 0
 
-  # Reboot system
   worker_power_action reboot
-
   DOING_INSTALL=0
-
   return 0
 }
 
-
 worker_select_net_install() {
-  # POC: strict copy of select_install, but with reworked install using pactrap instead of unsquashing
-
-  # Information: needs WAN. Ethernet only for now, no WiFi
   if ! ping -c 1 -W 2 github.com &>/dev/null ; then
     notify "You don't seem connected to Internet. Aborting."
     return 1
   fi
 
-  # Get the latest pacman mirrorlist and arch keyring
   curl -s https://archlinux.org/mirrorlist/all/https/ | sed 's+^#\(Server =.*\)+\1+' | sudo tee /etc/pacman.d/mirrorlist &>/dev/null || return 1
   sudo pacman -Sy --noconfirm --needed archlinux-keyring || return 1
 
   execute worker pre_install || return 1
 
-  # Sync NTP, mandatory. force timezone ?
-
-  # Run reflector too, worth for the download speed
   inform "Probing fastest up-to-date servers..."
   reflector --latest 20 \
     --sort rate \
     --protocol https \
     --save /etc/pacman.d/mirrorlist
 
-  # Install the bare minimum to be able to add arcade:arcade
   pacstrap -P -K /groovyarcade base
   arch-chroot /groovyarcade groupadd --gid 1000 arcade
   arch-chroot /groovyarcade useradd --uid 1000 --gid 1000 arcade
 
-  # We need that file or pacman will complain
   cp /etc/pacman.d/groovy-ux-repo.conf /groovyarcade/etc/pacman.d/groovy-ux-repo.conf
 
-  # Now we have arcade:arcade we can install all other packages
-  # Mind that, on a testing iso, we'll install using the -git packages
-  curl -L https://github.com/substring/os/raw/master/groovyarcade/packages.x86_64 | grep -v '^#' > /tmp/packages.x86_64
+  curl -L https://gitlab.com/groovyarcade/os/-/raw/master/groovyarcade/packages.x86_64 | grep -v '^#' > /tmp/packages.x86_64
   if pacman -Qi gasetup 2>/dev/null | grep -E '^Name[[:space:]]+' | grep -q 'gasetup-git' ; then
     sed -i -e 's/gasetup/gasetup-git/' \
       -e 's/gatools/gatools-git/' \
@@ -831,37 +1020,25 @@ worker_select_net_install() {
     return 1
   fi
 
-  # the airootfs from github must be pulled and applied
-  # Have both github and gitlab, github can be damn slow sometimes
-  #curl -sL https://github.com/substring/os/archive/refs/heads/master.tar.gz | tar xvzf - --no-overwrite-dir -C /groovyarcade --strip-components=3 os-master/groovyarcade/airootfs
   curl -sL https://gitlab.com/groovyarcade/os/-/archive/master/os-master.tar.gz | tar xvzf - --no-overwrite-dir -C /groovyarcade --strip-components=3 os-master/groovyarcade/airootfs
 
-  # Files unzipped as root must return to arcade:arcade ->
   arch-chroot /groovyarcade chown -R arcade:arcade /home/arcade
 
-  # For now, we disable that 'set -e -u' in the script as building the iso must fail on errors, not the net install
-  #arch-chroot /groovyarcade /bin/bash -c 'curl -L "https://github.com/substring/os/raw/master/groovyarcade/airootfs/root/customize_airootfs.sh" | bash'
   arch-chroot /groovyarcade /bin/bash -c 'curl -L "https://github.com/substring/os/raw/master/groovyarcade/airootfs/root/customize_airootfs.sh" | sed "s/set -e -u//" | bash'
-
-  # pacstrap left a gpg-agent running -> https://github.com/archlinux/arch-install-scripts/issues/56
-  #killall gpg-agent
 }
 
 
 worker_select_iso_install() {
-  unsquashfs -q -f -d /groovyarcade /run/archiso/bootmnt/groovyarcade/x86_64/airootfs.sfs
-  # Then copy /etc/switchres.ini shared/configs/mame/mame.ini shared/configs/ga.conf
+  swapoff -a
+  
+  unsquashfs -q -f -d /groovyarcade -percentage /run/archiso/bootmnt/groovyarcade/x86_64/airootfs.sfs | dialog --gauge "Installing to HD" 10 50
   mkdir -p /groovyarcade/{dev,proc,sys,tmp,run,mnt,media}
 
-  # Grab the kernel only, the initramfs will be generated form the arch-chroot
   cp -va /run/archiso/bootmnt/groovyarcade/boot/$(uname -m)/vmlinuz* /groovyarcade/boot/
   cp -va /run/archiso/bootmnt/groovyarcade/boot/*-ucode.img /groovyarcade/boot/
-  # Get rid of the fallback initramfs -> needed only when using rsync instead of unsquashfs
-  # rm /groovyarcade/boot/initramfs-linux*-fallback.img
 }
 
 worker_audio_menu() {
-
   local default=no
   AUDIO_SETUP=1
   while [ 0 = 0 ]; do
@@ -881,14 +1058,10 @@ worker_audio_menu() {
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
   done
-
   return 0
-
 }
 
-
 worker_alsamixer() {
-  # Consider the default card to be good if it hasn't been set
   if ! alsa_card_num=$(get_config_value "$GA_CONF" alsa| cut -d ',' -f 1) ; then
     alsa_card_num=0
   fi
@@ -898,8 +1071,6 @@ worker_alsamixer() {
 }
 
 worker_default_card() {
-  #audiodev=$(LANG=C aplay -l | grep ^card | sed -e "s/],.*//g" | sed -e "s/^card //g" | sed -e "s/://g" | awk '{printf("%s %s-%s \n", $1,$3,$4,$5)}' | sed -e "s/[[]//g" | uniq)
-  #audiodev="$(LANG=C aplay --list-devices | grep "^card" | while IFS='\n' read l ; do  cardnum=$(echo $l | sed -E 's!card ([0-9]+):.*!\1!'); cardname=$(echo $l | sed -E 's!.*\[(.*)\],.*!\1!'); devnum=$(echo $l | sed -E 's!.*device ([0-9]+):.*!\1!'); devname=$(echo $l | sed -E 's!.*\[(.*)\]$!\1!'); echo \"$cardnum,$devnum\" \"$cardname $devname\"; done)"
   declare -a audiodev
   while IFS='\n' read l ; do
     cardnum=$(echo $l | sed -E 's!card ([0-9]+):.*!\1!')
@@ -956,16 +1127,12 @@ worker_network_menu() {
     ask_option $default "Network Setup Menu" "Setup Network" required \
       1 "WiFi setup (new)" \
       4 "Return to Main" || return
-      #2 "Config Network" \
-      #3 "Fix Network" \
 
-    # Disabled option 2. If people require manual settings, let them learn Linux
     case $ANSWER_OPTION in
       "1") execute worker configure_wifi ;;
       "2")
         ask_option $default "Setup Network Interface" "Choose an interface" required $IFACES "Cancel" "-" || return 1
         if [ "$ANSWER_OPTION" = "Cancel" ]; then
-          #return 0
           execute worker network_menu
           return
         fi
@@ -987,7 +1154,6 @@ worker_network_menu() {
           if [ $ANSWER_OPTION = "1" ]; then
             PREVSS=$(grep ssid= $CONFIG_FILE | awk -F = '{print $2}')
             ask_string "Wireless SSID:" "$PREVSS" || return 1
-            #SSID=${ANSWER_STRING// /}
             SSID=$ANSWER_STRING
           else
             sudo ifconfig $IFACE down up
@@ -1031,7 +1197,6 @@ worker_network_menu() {
         mv ${CONFIG_FILE_TMP} ${CONFIG_FILE}
         echo "wireless=$WIRED" >>$CONFIG_FILE
 
-        #STATIC=yes
         DINAMIC=yes
         ask_yesno "Setup $IFACE with a dynamic IP?" || DINAMIC=no
         if [ "${DINAMIC}" = "no" ]; then
@@ -1046,7 +1211,6 @@ worker_network_menu() {
           DNSSEARCH=$DNSDOMAIN
         fi
 
-        # Static IP
         if [ "${DINAMIC}" = "no" ]; then
           sed -ri "s/^IP=.*/IP=static/" /etc/netctl/$file
           sed -ri "s/^Interface=.*/Interface=$IFACE/" /etc/netctl/$file
@@ -1071,26 +1235,16 @@ worker_network_menu() {
         fi
 
         if [ "${WIRED}" = "no" ]; then
-          #	echo "modules=( \"wpa_supplicant\" )" >> /etc/conf.d/net
-          #	echo "wpa_supplicant_${IFACE}=\"-Dwext\"" >> /etc/conf.d/net
-          #cat /etc/wpa_supplicant.conf.origin \
-          #	|sed -e s/ssid=\"\"/ssid=\"${SSID}\"/g \
-          #	|sed -e s/psk=\"\"/psk=\"${KEY}\"/g \
-          #		> /etc/wpa_supplicant.conf
-
           sed -ri "s/^[#]*ESSID='.*/ESSID='${SSID}'/" /etc/netctl/$file
           sed -ri "s/^[#]*Security=.*/Security=${SECURI}/" /etc/netctl/$file
           sed -ri "s/^[#]*Key='.*/Key='${KEY}'/" /etc/netctl/$file
           sed -ri "s/^Connection=.*/Connection=wireless/" /etc/netctl/$file
 
-        #	cp -f /etc/wpa_supplicant/wpa_supplicant.conf $CONFIG_DIR/
         else
-
           sed -ri "s/^ESSID='.*/#ESSID=''/" /etc/netctl/$file
           sed -ri "s/^Security=.*/#Security=wpa/" /etc/netctl/$file
           sed -ri "s/^Key='.*/#Key=''/" /etc/netctl/$file
           sed -ri "s/^Connection=.*/Connection=ethernet/" /etc/netctl/$file
-
         fi
 
         ask_yesno "Bring up $IFACE interface?" || return
@@ -1099,9 +1253,6 @@ worker_network_menu() {
         if [ "${ISUP}" = "" ]; then
           notify "Net Not Found"
         else
-          #netctl reenable $file
-          #netctl stop-all
-          #systemctl restart netctl@static.service
           if [ "${DINAMIC}" = "yes" -a "${WIRED}" = "no" ]; then
             ifconfig $IFACE down
             dhcpcd -x 2>>/dev/tty12
@@ -1162,7 +1313,6 @@ Connection=ethernet
 Interface=eth0
 IP=static
 Address=('192.168.1.69/24')
-#Routes=('192.168.0.0/24 via 192.168.1.2')
 Gateway='192.168.1.1'
 DNS=('8.8.8.8')
 SkipNoCarrier=yes
@@ -1181,7 +1331,6 @@ DNS=('8.8.8.8')
 ForceConnect=yes" >>/etc/netctl/wifi 2>>/dev/tty12
 
         notify "Now Your Network Config Is Default\n\n\n"
-
         default=2
         ;;
       "2") execute worker disable_wiimote && default=3 ;;
@@ -1230,7 +1379,6 @@ worker_select_passwd() {
 worker_partition_disks() {
   local default=no
   sigue=1
-  #inform "Stopping Automount..."
   ask_yesno "Do you want to stop Automount?" || sigue=0
   if [ "$sigue" = "1" ]; then
     sudo umount /media/* >/dev/tty12 2>&1
@@ -1266,61 +1414,71 @@ function pass_value() {
   b=$2
   c=$3
   inform "$a $b"
-
   vA=$(grep -i $a $b)
-
   vB=$(cat $b | grep $a | awk '{print $2}')
   inform "valor vb $vB"
   sleep 3
-
   return $vA $vB $vC
-
 }
 
 
 worker_select_frontend() {
-  local default=no
-  local fe_map
-  # list FE, build the array for the ask_option
-  fe_list="$(ls -1 "$MOTHER_OF_ALL"/frontends)"
-  i=1
-  declare -A fe_array
-  for fe in $fe_list ; do
-    # It's based on the "provided" rather than the package name
-    # which is awesome afterall
-    if ! pacman -Qi "$fe" &>/dev/null && ! pacman -Qi "$fe-git" &>/dev/null ; then
-      continue
-    fi
-    # Attract is the default FE, must be installed. This is an ugly workaround
-    # because if attract really get uninstalled, AM+ won't show
-    [[ $fe == attractplus ]] && continue
-    fe_array[$i]=$fe
-    fe_map+=($i $fe)
-    i=$((i+1))
-  done
-  # Add the default LXDE
-  fe_array[$i]="lxde"
-  fe_map+=($i "lxde")
-  i=$((i+1))
-  fe_map+=($i "Return to Main")
-  # From now on, $i points to Return to Main
+  [[ -z $GA_VIDEO_DATA ]] && GA_VIDEO_DATA=/opt/galauncher/videodata.conf
+  local curr_video="$(get_config_value "$GA_CONF" video.backend)"
+  curr_video=${curr_video:-X}
+  inform "Building the offline frontends list for $curr_video..."
+  
+  fe_list=()
+  declare -A fe_list_no_index
+  idx=1
+  fe_available=0
 
-  while true ; do
-    ask_option $default "Front-End Setup Menu" "Setup Front End/Window Manager" required "${fe_map[@]}" || return
-    [[ $ANSWER_OPTION == $i ]] && return 0
-    if [[ ${fe_array[$ANSWER_OPTION]+_} ]] ; then
-      set_config_value "$GA_CONF" frontend ${fe_array[$ANSWER_OPTION]}
-      ret=$?
-      notify "Switched to ${fe_array[$ANSWER_OPTION]} Front End\n\n\n\n"
-      unset fe_map
-      unset fe_array
-      return $ret
-    else
-      notify "Bad option $ANSWER_OPTION given"
+  for fe in $(grep -E -o "^frontend\.[[:alnum:]-]*\." "$GA_VIDEO_DATA" | sort | uniq | cut -d '.' -f 2) ; do
+    [[ "$fe" == "pegasus-frontend" ]] && continue
+
+    if pacman -Qi "$fe" &>/dev/null && check_frontend_video_backend_available "$curr_video" "$fe" ; then
+      fe_available=1
+      fe_list+=("$idx" "$fe")
+      fe_list_no_index[$idx]="$fe"
+      idx=$((idx + 1))
+    fi
+    if pacman -Qi "$fe"-git &>/dev/null && check_frontend_video_backend_available "$curr_video" "$fe" ; then
+      fe_available=1
+      fe_list+=("$idx" "$fe"-git)
+      fe_list_no_index[$idx]="${fe}-git"
+      idx=$((idx + 1))
     fi
   done
+
+  if [[ $fe_available == 0 ]] ; then
+    inform "Couldn't find any installed emulator compatible with $curr_video" ; sleep 2
+    return 1
+  fi
+
+  fe_list+=("$idx" "lxde")
+  fe_list_no_index[$idx]="lxde"
+
+  ask_option 1 "Select a frontend (Offline Mode)" '' required "${fe_list[@]}"
+  ret_code=$?
+  selected_fe="${fe_list_no_index[${ANSWER_OPTION}]}"
+  
+  if [[ -z "$selected_fe" && $ret_code == 0 ]] ; then
+    notify "Couldn't set your FE to $selected_fe"
+    return 1
+  elif [[ -z "$selected_fe" && $ret_code == 1 ]] ; then
+    return 1
+  fi
+
+  if ! set_config_value "$GA_CONF" frontend "$selected_fe" ; then
+    notify "Couldn't set the frontend, you may not reach it"
+    return 1
+  fi
+  
+  inform "Successfully set your frontend to $selected_fe" ; sleep 2
+  log_info "Switched FE to $selected_fe on $curr_video"
   return 0
 }
+
 
 create_xinit() {
   FILE=/home/arcade/.xinitrc
@@ -1381,11 +1539,11 @@ worker_setup_wahcade() {
   create_xinit
 
   echo "if [ ! -d \".wahcade\" ]; then" >>/home/arcade/.xinitrc
-  echo "	startlxde" >>/home/arcade/.xinitrc
-  echo "	wahcade-setup" >>/home/arcade/.xinitrc
+  echo "    startlxde" >>/home/arcade/.xinitrc
+  echo "    wahcade-setup" >>/home/arcade/.xinitrc
   echo "else" >>/home/arcade/.xinitrc
   echo "openbox --config-file ~/.config/GAop.xml &" >>/home/arcade/.xinitrc
-  echo "	wahcade" >>/home/arcade/.xinitrc
+  echo "    wahcade" >>/home/arcade/.xinitrc
   echo "fi" >>/home/arcade/.xinitrc
 
   sudo sed -ri "s/startx[[:space:]].*/startx/g" /home/arcade/.bash_profile
@@ -1408,7 +1566,8 @@ worker_boot_custom() {
     8 "512x384@58-25Khz" \
     9 "800x600@60-25Khz" \
     10 "1024x768@50-25Khz" \
-    11 "640x480@60-31Khz" || return
+    11 "640x480@60-31Khz" \
+    12 "Return / Cancel" || return
   case $ANSWER_OPTION in
     "1") VBMODE="328 240 60" ;;
     "2") VBMODE="648 480 60" ;;
@@ -1416,6 +1575,7 @@ worker_boot_custom() {
     "4") VBMODE="768 576 60" ;;
     "5") VBMODE="808 600 60" ;;
     "6") VBMODE="1032 768 60" ;;
+    "12") return 0 ;;
     *) notify "Bad option $ANSWER_OPTION given" ;;
   esac
 
@@ -1429,7 +1589,7 @@ worker_mindotclock() {
   MDOT=$(grep "^[#]*dotclock_min" /home/arcade/mame.ini | awk '{print $2}')
   ask_string "Change MinDotClock\nDefault=0 Recommend=8" "$MDOT" || return 1
   MDOTT=${ANSWER_STRING// /}
-  sed -ri "s/^[#]*dotclock_min.*/dotclock_min 			  $MDOTT/" /home/arcade/mame.ini
+  sed -ri "s/^[#]*dotclock_min.*/dotclock_min               $MDOTT/" /home/arcade/mame.ini
   return 0
 }
 
@@ -1440,7 +1600,11 @@ worker_select_swap() {
     notify "No drives are available to use"
     return 0
   fi
-  ask_option $default "Swap Partition" "Choose a drive" required $DRIVES || return 1
+  ask_option $default "Swap Partition" "Choose a drive" required $DRIVES "Cancel" "-" || return 1
+
+  if [ "$ANSWER_OPTION" = "Cancel" ]; then
+    return 0
+  fi
 
   cat $CONFIG_FILE | sed -e 's/swap=.*//g' | grep -v ^$ >${CONFIG_FILE_TMP}
   mv ${CONFIG_FILE_TMP} ${CONFIG_FILE}
@@ -1468,7 +1632,11 @@ worker_select_home() {
     notify "No drives are available to use"
     return 0
   fi
-  ask_option $default "Home Partition" "Choose a drive" required $DRIVES || return 1
+  ask_option $default "Home Partition" "Choose a drive" required $DRIVES "Cancel" "-" || return 1
+
+  if [ "$ANSWER_OPTION" = "Cancel" ]; then
+    return 0
+  fi
 
   if [ "$ROMS_DRIVE" = "$ANSWER_OPTION" ]; then
     notify "You cannot use the same drive for the Home drive as the Roms drive"
@@ -1520,7 +1688,11 @@ worker_select_roms() {
     notify "No drives are available to use"
     return 0
   fi
-  ask_option $default "Rom/Snap Partition" "Choose a drive" required $DRIVES || return 1
+  ask_option $default "Rom/Snap Partition" "Choose a drive" required $DRIVES "Cancel" "-" || return 1
+
+  if [ "$ANSWER_OPTION" = "Cancel" ]; then
+    return 0
+  fi
 
   if [ "$HOME_DRIVE" = "$ANSWER_OPTION" ]; then
     notify "You cannot use the same drive for Roms as the Home drive"
@@ -1543,7 +1715,6 @@ worker_select_roms() {
 
   ROM_FSTYPE=$(fdisk -l | grep $ANSWER_OPTION | awk '{print $6}')
   if [ "$ROM_FSTYPE" != "Linux" ]; then
-    #EXTRA_MOUNT_OPTS="-o uid=1000,gid=1000"
     EXTRA_MOUNT_OPTS="-o rw"
   fi
 
@@ -1551,9 +1722,7 @@ worker_select_roms() {
   inform "Mounting Rom/Snap partition $ANSWER_OPTION in /home/roms/"
 
   if [ -f "/home/roms/1" -a ! -d "/home/roms.default" ]; then
-
     mv -f /home/roms /home/roms.default
-
     mkdir /home/roms
     chown -Rf arcade.nobody /home/roms
     chmod 777 /home/roms
@@ -1575,12 +1744,6 @@ worker_select_roms() {
       rm -f /home/roms/1
       rm -rf /home/roms.default
     fi
-  #DROMS=yes
-  #ask_yesno "Do you want DELETE Backup previous ROMS files?" || DROMS=no
-  #if [ "$DROMS" = "yes" ]; then
-  #inform "Deleting default ROMS files"
-  #rm -rf /home/roms.default
-  #fi
   fi
   inform "Done creating /home/roms user directory"
 
@@ -1619,7 +1782,6 @@ worker_msg_report() {
 worker_abort_installer() {
   ret=0
   ask_yesno "Exit Setup Menu?" || return
-  #maybe_interactive_rollback_filesystems || ret=$?
   stop_installer || ret=$?
   return $ret
 }
@@ -1666,7 +1828,9 @@ worker_updatega() {
 
   ask_option $default "Update from" "" required \
     1 "Online Site" \
-    2 "Local Site" || return
+    2 "Local Site" \
+    3 "Cancel" || return
+    
   case $ANSWER_OPTION in
     "1")
       gdrivedl "https://drive.google.com/open?id=0B0NB2HYUHHktZmUwVXNucnRVS2c" >/dev/tty12 2>&1
@@ -1674,6 +1838,7 @@ worker_updatega() {
       gdrive="1"
       ;;
     "2") gro=$(find -iname "*$1*" | sed -e s/.\.// | awk '{printf("%s -\n", $1)}') ;;
+    "3") return 0 ;;
   esac
 
   ask_option $default "Update $MSG" "Choose a $MSG binary." required $gro "Cancel" "-" || return 1
@@ -1714,16 +1879,18 @@ worker_updatega() {
 }
 
 worker_updategroovy() {
-  #UpdateGroovyMame.sh
   local default=no
   gro=""
   gdrive=""
   utmp="/home/arcade/Update"
   cd $utmp
   rm UpdateGMU
+  
   ask_option $default "Update from" "" required \
     1 "Online Site" \
-    2 "Local Site" || return
+    2 "Local Site" \
+    3 "Cancel" || return
+    
   case $ANSWER_OPTION in
     "1")
       gdrivedl "https://drive.google.com/open?id=0B0NB2HYUHHktZmUwVXNucnRVS2c" >/dev/tty12 2>&1
@@ -1731,6 +1898,7 @@ worker_updategroovy() {
       gdrive="1"
       ;;
     "2") gro=$(ls *groovy* | awk '{printf("%s -\n", $1)}') ;;
+    "3") return 0 ;;
   esac
 
   ask_option $default "Update GroovyMAME" "Choose a GroovyMAME binary." required $gro "Cancel" "-" || return 1
@@ -1741,8 +1909,7 @@ worker_updategroovy() {
   clear
   inform "Downloading "$ANSWER_OPTION""
   sleep 2
-  #cd $utmp
-  #rm -Rf groov* Groov* howto*
+
   if [ $gdrive = "1" ]; then
     gdrivedl "$link" >/dev/tty12 2>&1
   fi
@@ -1752,9 +1919,7 @@ worker_updategroovy() {
     tar xvf $ANSWER_OPTION -C /usr/local/bin/ >/dev/tty12 2>&1
     sudo chmod 777 /usr/local/bin/* $utmp/* >/dev/tty12 2>&1
   else
-
     sh howto.sh
-
   fi
 
   return 0
@@ -1767,16 +1932,21 @@ worker_updateadvmenu() {
   gdrive=""
   cd /tmp/
   rm UpdateADV
+  
   ask_option $default "Update from" "" required \
     1 "New Web Site" \
-    2 "Old Web Site" || return
+    2 "Old Web Site" \
+    3 "Cancel" || return
+    
   case $ANSWER_OPTION in
     "1")
       url="https://googledrive.com/host/0B0NB2HYUHHktRjRaVmVqM2lpalU/"
       drive="1"
       ;;
     "2") url="http://groovyarcade.googlecode.com/files/" ;;
+    "3") return 0 ;;
   esac
+  
   wget $url"UpdateADV" >/dev/tty12 2>&1
   gro=$(grep -ri "advme*" /tmp/UpdateADV | cut -d " " -f1 | awk '{printf("%s -\n", $1)}')
   ask_option $default "Update AdvmenuPlus" "Choose an AdvmenuPlus binary." required $gro "Cancel" "-" || return 1
@@ -1801,9 +1971,7 @@ worker_updateadvmenu() {
     tar xvf $ANSWER_OPTION -C /usr/local/bin/
     sudo chmod 777 /usr/local/bin/*
   else
-
     sh howto.sh
-
   fi
 
   return 0
@@ -1846,12 +2014,9 @@ worker_updatescripts() {
     tar xvf $ANSWER_OPTION -C /usr/local/bin/
     sudo chmod 777 /usr/local/bin/*
   else
-
     sh howto.sh
-
   fi
 
-  #Updatemenu.sh
   return 0
 }
 
@@ -1862,36 +2027,282 @@ worker_updatesystem() {
     tar xvf $ANSWER_OPTION -C /usr/local/bin/
     sudo chmod 777 /usr/local/bin/*
   else
-
     sh howto.sh
-
   fi
 }
+
+# --- LPT KEYCODER SUBMENU ---
+worker_lpt_keycoder_menu() {
+  local default=no
+  while [ 0 = 0 ]; do
+    # Check if service file exists to determine installation status
+    if [ -f "/etc/systemd/system/lpt_keycoder.service" ]; then
+      
+      # Check if it is running or enabled
+      if systemctl is-active --quiet lpt_keycoder.service 2>/dev/null || systemctl is-enabled --quiet lpt_keycoder.service 2>/dev/null; then
+        # STATE: Installed and Active
+        ask_option $default "LPT Keycoder Arcade" "Select an action" required \
+          1 "Install / Update Keycoder" \
+          2 "Disable Keycoder Service" \
+          3 "Return to Joystick Menu" || return
+          
+        case $ANSWER_OPTION in
+          "1") execute worker lpt_keycoder_install && default=2 ;;
+          "2") execute worker lpt_keycoder_disable && default=3 ;;
+          "3") return 0 ;;
+          *) notify "Bad option $ANSWER_OPTION given" ;;
+        esac
+      else
+        # STATE: Installed but Disabled
+        ask_option $default "LPT Keycoder Arcade" "Select an action" required \
+          1 "Install / Update Keycoder" \
+          2 "Enable Keycoder Service" \
+          3 "Return to Joystick Menu" || return
+          
+        case $ANSWER_OPTION in
+          "1") execute worker lpt_keycoder_install && default=2 ;;
+          "2") execute worker lpt_keycoder_enable && default=3 ;;
+          "3") return 0 ;;
+          *) notify "Bad option $ANSWER_OPTION given" ;;
+        esac
+      fi
+    else
+      # STATE: Not Installed
+      ask_option $default "LPT Keycoder Arcade" "Select an action" required \
+        1 "Install Keycoder" \
+        2 "Return to Joystick Menu" || return
+        
+      case $ANSWER_OPTION in
+        "1") execute worker lpt_keycoder_install && default=2 ;;
+        "2") return 0 ;;
+        *) notify "Bad option $ANSWER_OPTION given" ;;
+      esac
+    fi
+  done
+  return 0
+}
+
+worker_lpt_keycoder_install() {
+  clear
+  echo "Preparing environment for LPT Keycoder installation..."
+  sleep 1
+  
+  # --- CONFLICT RESOLUTION BEFORE INSTALL ---
+  # Remove OpenPPJOY auto-load to prevent boot conflicts
+  sudo rm -f /etc/modules-load.d/openppjoy.conf 2>/dev/null
+  # Unload conflicting kernel-space modules
+  sudo rmmod gamecon 2>/dev/null
+  sudo rmmod openppjoy 2>/dev/null
+  sudo rmmod parport_pc 2>/dev/null
+  # ------------------------------------------
+  
+  sudo /opt/gatools/lpt_keycoder/setup_lpt.sh
+  
+  echo -e "\nPress [ENTER] to return to the menu..."
+  read
+  return 0
+}
+
+worker_lpt_keycoder_enable() {
+  inform "Starting and enabling LPT Keycoder service..."
+  
+  # --- CONFLICT RESOLUTION ---
+  # Remove OpenPPJOY auto-load
+  sudo rm -f /etc/modules-load.d/openppjoy.conf 2>/dev/null
+  
+  # Unload conflicting kernel-space modules
+  sudo rmmod gamecon 2>/dev/null
+  sudo rmmod openppjoy 2>/dev/null
+  sudo rmmod parport_pc 2>/dev/null
+  
+  # Ensure user-space modules are loaded for the Keycoder
+  sudo modprobe lp 2>/dev/null
+  sudo modprobe ppdev 2>/dev/null
+  # ---------------------------
+
+  sudo systemctl enable lpt_keycoder.service 2>/dev/null
+  sudo systemctl start lpt_keycoder.service 2>/dev/null
+  
+  notify "LPT Keycoder service has been successfully enabled!\n\nHardware conflict resolved. OpenPPJOY modules unloaded."
+  return 0
+}
+
+worker_lpt_keycoder_disable() {
+  inform "Stopping and disabling LPT Keycoder service..."
+  sudo systemctl stop lpt_keycoder.service 2>/dev/null
+  sudo systemctl disable lpt_keycoder.service 2>/dev/null
+  notify "LPT Keycoder service has been successfully disabled."
+  return 0
+}
+# --- END LPT KEYCODER SUBMENU ---
+
 
 worker_joystick_menu() {
   local default=no
   while [ 0 = 0 ]; do
     ask_option $default "Joystick" "" required \
-      1 "Wiimote Options" \
-      2 "OpenPPJOY & Pc2Jamma Setup" \
-      3 "Ps3/4 Options" \
-      4 "Xbox Options" \
-      5 "Antimicro Autostart" \
-      6 "Qjoy Autostart" \
-      7 "Return to Main" || return
+      1 "LPT Keycoder Arcade (God-Mode)" \
+      2 "Arcade Gamepad Pro (gamepad2key)" \
+      3 "Wiimote Options" \
+      4 "OpenPPJOY & Pc2Jamma Setup" \
+      5 "Ps3/4 Options" \
+      6 "Xbox Options" \
+      7 "Antimicro Autostart" \
+      8 "Qjoy Autostart" \
+      9 "Return to Main" || return
 
     case $ANSWER_OPTION in
-      "1") execute worker wiimote_menu && default=2 ;;
-      "2") execute worker openppjoy && default=3 ;;
-      "3") notify "Not Available Yet\n\n" && default=4 ;;
-      "4") notify "Not Available Yet\n\n" && default=5 ;;
-      "5") execute worker joy2key antimicro && default=7 ;;
-      "6") execute worker joy2key qjoypad && default=7 ;;
-      "7") return 0 ;;
+      "1") execute worker lpt_keycoder_menu && default=2 ;;
+      "2") execute worker gamepad_pro_menu && default=3 ;;
+      "3") execute worker wiimote_menu && default=4 ;;
+      "4") execute worker openppjoy_menu && default=5 ;;
+      "5") notify "Not Available Yet\n\n" && default=6 ;;
+      "6") notify "Not Available Yet\n\n" && default=7 ;;
+      "7") execute worker joy2key antimicro && default=8 ;;
+      "8") execute worker joy2key qjoypad && default=9 ;;
+      "9") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
   done
 
+  return 0
+}
+
+# ==========================================================
+# --- ARCADE GAMEPAD PRO SUBMENU ---
+# ==========================================================
+worker_gamepad_pro_menu() {
+  local default=no
+  while [ 0 = 0 ]; do
+    # Check if the service file exists (if it is installed)
+    if [ -f "/etc/systemd/system/gamepad2key.service" ]; then
+      
+      # ACTIVE CHECK: Check if the service is running right now
+      if systemctl is-active --quiet gamepad2key.service 2>/dev/null; then
+        local daemon_state="Disable"
+      else
+        local daemon_state="Enable"
+      fi
+
+      ask_option $default "Arcade Gamepad Pro" "Select an action" required \
+        1 "Configure Gamepad (GUI)" \
+        2 "$daemon_state Gamepad Daemon" \
+        3 "Uninstall Gamepad Pro" \
+        4 "Return to Joystick Menu" || return
+        
+      case $ANSWER_OPTION in
+        "1") execute worker gamepad_pro_configure && default=2 ;;
+        "2") execute worker gamepad_pro_toggle "$daemon_state" && default=3 ;;
+        "3") execute worker gamepad_pro_uninstall && default=4 ;;
+        "4") return 0 ;;
+        *) notify "Bad option $ANSWER_OPTION given" ;;
+      esac
+    else
+      # If not installed, show only the install option
+      ask_option $default "Arcade Gamepad Pro" "Select an action" required \
+        1 "Install Arcade Gamepad Pro" \
+        2 "Return to Joystick Menu" || return
+        
+      case $ANSWER_OPTION in
+        "1") execute worker gamepad_pro_install && default=2 ;;
+        "2") return 0 ;;
+        *) notify "Bad option $ANSWER_OPTION given" ;;
+      esac
+    fi
+  done
+  return 0
+}
+
+worker_gamepad_pro_install() {
+  clear
+  echo "Preparing to install Arcade Gamepad Pro..."
+  sleep 1
+  
+  local INSTALL_SCRIPT="/opt/gatools/gamepad2key/install.sh"
+  
+  if [ -f "$INSTALL_SCRIPT" ]; then
+      sudo chmod +x "$INSTALL_SCRIPT"
+      
+      # Catch the exit code from install.sh
+      if sudo "$INSTALL_SCRIPT"; then
+          echo -e "\nPress [ENTER] to return to the menu..."
+          read
+      else
+          echo -e "\nInstallation failed or was aborted! Press [ENTER] to return..."
+          read
+      fi
+  else
+      notify "Installer not found at $INSTALL_SCRIPT!\nPlease ensure the files are in the correct directory."
+  fi
+  return 0
+}
+
+worker_gamepad_pro_uninstall() {
+  ask_yesno "Are you sure you want to completely remove Arcade Gamepad Pro?" || return 0
+  inform "Uninstalling Arcade Gamepad Pro..."
+  
+  sudo systemctl stop gamepad2key.service 2>/dev/null
+  sudo systemctl disable gamepad2key.service 2>/dev/null
+  sudo rm -f /etc/systemd/system/gamepad2key.service
+  
+  # Assumes the installation folder is /opt/gamepad2key (Change if your install.sh sends it elsewhere)
+  sudo rm -rf /opt/gamepad2key 
+  
+  # Clean up shortcuts
+  sudo rm -f /usr/share/applications/GamepadConfig.desktop
+  sudo rm -f /home/arcade/Desktop/GamepadConfig.desktop
+  
+  sudo systemctl daemon-reload
+  notify "Arcade Gamepad Pro has been removed."
+  return 0
+}
+
+worker_gamepad_pro_toggle() {
+  if [ "$1" == "Enable" ]; then
+    inform "Enabling and Starting Gamepad Pro Daemon..."
+    # Enable on boot and start the daemon now
+    sudo systemctl enable gamepad2key.service 2>/dev/null
+    sudo systemctl start gamepad2key.service 2>/dev/null
+    notify "Gamepad Pro daemon is now ENABLED and RUNNING."
+  else
+    inform "Disabling and Stopping Gamepad Pro Daemon..."
+    # Disable from boot and stop the daemon now
+    sudo systemctl disable gamepad2key.service 2>/dev/null
+    sudo systemctl stop gamepad2key.service 2>/dev/null
+    notify "Gamepad Pro daemon is now DISABLED and STOPPED."
+  fi
+  return 0
+}
+
+worker_gamepad_pro_configure() {
+  # 1. Alert the user about the screen change
+  ask_yesno "This configuration tool requires a graphical desktop (X11).\nYou will be redirected to the LXDE desktop to configure it.\n\nWhen you close the desktop, you will return here.\nContinue?" || return 0
+  
+  inform "Launching Desktop Environment for Configuration..."
+  
+  # 2. Create a TEMPORARY xinitrc just for this graphical boot
+  local tmp_xinit="/home/arcade/.xinitrc.gamepad"
+  cat << 'EOF' > "$tmp_xinit"
+xhost +
+xset s off
+xset -dpms
+# Launch the GUI interface in the background and start LXDE
+python3 /opt/gamepad2key/gui_gamepad.py &
+exec startlxde
+EOF
+
+  # Set correct permissions for the arcade user
+  chown arcade:arcade "$tmp_xinit"
+  chmod +x "$tmp_xinit"
+  
+  # 3. Start X11 using the temporary file we just created.
+  # When the user logs out from LXDE, X11 shuts down and the script continues here!
+  su arcade -c "startx $tmp_xinit -- vt7" > /dev/null 2>&1
+  
+  # 4. Clean up the evidence after the user exits the desktop
+  rm -f "$tmp_xinit"
+  
+  clear
   return 0
 }
 
@@ -1909,7 +2320,7 @@ worker_wiimote_menu() {
       "1") execute worker detectwiimote && default=2 ;;
       "2") execute worker eventwiimote && default=3 ;;
       "3") execute worker disable_wiimote && default=4 ;;
-      "4") notify "Not Available Yet\n\n" && default=5 ;; ##execute worker none        && default=5 ;;
+      "4") notify "Not Available Yet\n\n" && default=5 ;;
       "5") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
@@ -1945,11 +2356,115 @@ worker_disable_wiimote() {
   fi
 
   return 0
-
 }
-worker_openppjoy() {
+
+# --- OPENPPJOY & PC2JAMMA SUBMENU ---
+worker_openppjoy_menu() {
+  local default=no
+  while [ 0 = 0 ]; do
+    # Check if the config file exists to determine if it's enabled
+    if [ -f "/etc/modules-load.d/openppjoy.conf" ]; then
+      # STATE: Installed
+      ask_option $default "OpenPPJOY & Pc2Jamma" "Select an action" required \
+        1 "Edit Configuration (Manual)" \
+        2 "Disable OpenPPJOY" \
+        3 "Return to Joystick Menu" || return
+        
+      case $ANSWER_OPTION in
+        "1") execute worker openppjoy_edit && default=2 ;;
+        "2") execute worker openppjoy_disable && default=3 ;;
+        "3") return 0 ;;
+        *) notify "Bad option $ANSWER_OPTION given" ;;
+      esac
+    else
+      # STATE: Not Installed
+      ask_option $default "OpenPPJOY & Pc2Jamma" "Select an action" required \
+        1 "Enable OpenPPJOY & Pc2Jamma" \
+        2 "Return to Joystick Menu" || return
+        
+      case $ANSWER_OPTION in
+        "1") execute worker openppjoy_enable && default=2 ;;
+        "2") return 0 ;;
+        *) notify "Bad option $ANSWER_OPTION given" ;;
+      esac
+    fi
+  done
+  return 0
+}
+
+worker_openppjoy_enable() {
+  inform "Enabling Gamecon/OpenPPJOY modules for SNES/JAMMA..."
+  
+  # --- CONFLICT RESOLUTION ---
+  # 1. Stop and disable LPT Keycoder service to free up the Parallel Port
+  if systemctl is-active --quiet lpt_keycoder.service 2>/dev/null || systemctl is-enabled --quiet lpt_keycoder.service 2>/dev/null; then
+      sudo systemctl stop lpt_keycoder.service 2>/dev/null
+      sudo systemctl disable lpt_keycoder.service 2>/dev/null
+  fi
+  
+  # 2. Unload the conflicting user-space parallel port modules
+  sudo rmmod lp 2>/dev/null
+  sudo rmmod ppdev 2>/dev/null
+  # ---------------------------
+
+  # 3. Create the modprobe options file WITH BLACKLIST
+  cat <<EOF | sudo tee /etc/modprobe.d/openppjoy-options.conf > /dev/null
+blacklist lp
+blacklist ppdev
+options openppjoy map=0,2,3
+options gamecon map=0,1,1,1,1
+EOF
+
+  # 4. Create the auto-load file
+  cat <<EOF | sudo tee /etc/modules-load.d/openppjoy.conf > /dev/null
+parport_pc
+#openppjoy
+gamecon
+EOF
+  
+  # 5. Clean up the kernel space for a fresh start
+  sudo rmmod gamecon 2>/dev/null
+  sudo rmmod openppjoy 2>/dev/null
+  sudo rmmod parport_pc 2>/dev/null
+  
+  # 6. Load the correct modules for SNES controllers
+  sudo modprobe parport_pc 2>/dev/null
+  sudo modprobe gamecon 2>/dev/null
+  
+  # Added the explicit warning about LPT Keycoder being disabled
+  notify "Gamecon/OpenPPJOY enabled successfully!\n\nHardware conflict resolved: LPT Keycoder was disabled.\n4x SNES controllers are now active."
+  return 0
+}
+
+worker_openppjoy_disable() {
+  inform "Disabling Gamecon/OpenPPJOY modules..."
+  
+  # Remove configurations (including the blacklist)
+  sudo rm -f /etc/modules-load.d/openppjoy.conf
+  sudo rm -f /etc/modprobe.d/openppjoy-options.conf
+  
+  # Unload modules from the running kernel
+  sudo rmmod gamecon 2>/dev/null
+  sudo rmmod openppjoy 2>/dev/null
+  
+  notify "Modules have been successfully disabled."
+  return 0
+}
+
+worker_openppjoy_edit() {
   clear
-  nano -R /etc/modules-load.d/openppjoy.conf
+  echo "Opening module load configuration (/etc/modules-load.d/)..."
+  sudo nano /etc/modules-load.d/openppjoy.conf
+  
+  clear
+  echo "Opening module options mapping (/etc/modprobe.d/)..."
+  sudo nano /etc/modprobe.d/openppjoy-options.conf
+  
+  # Reload modules to apply any manual changes
+  inform "Applying manual changes..."
+  sudo rmmod gamecon 2>/dev/null
+  sudo rmmod openppjoy 2>/dev/null
+  sudo modprobe gamecon 2>/dev/null
   return 0
 }
 
@@ -2008,7 +2523,7 @@ worker_wiimoteA() {
   sudo systemctl stop wiimote 2>>/dev/tty12
   foundblu=$(sudo bt-adapter -i 2>&1 | grep -o 'hci[0-9]')
   if [ "$foundblu" == "" ]; then
-    inform "Bluetooth no detect or unsupport	\n\n"
+    inform "Bluetooth no detect or unsupport    \n\n"
     sleep 2
     return
   else
@@ -2035,7 +2550,7 @@ worker_wiimoteB() {
   sudo systemctl stop wiimote 2>>/dev/tty12
   foundblu=$(sudo bt-adapter -i 2>&1 | grep -o 'hci[0-9]')
   if [ "$foundblu" == "" ]; then
-    inform "Bluetooth no detect or unsupport	\n\n"
+    inform "Bluetooth no detect or unsupport    \n\n"
     sleep 2
     return
   else
@@ -2125,8 +2640,7 @@ worker_confidiroms() {
     esac
 
     if [ "$emu" == "DEFAULT" ]; then
-      #sed -ri "s@^rompath.*@rompath                   /home/roms/MAME/roms;@g" /home/arcade/mame.ini
-      sed -ri "s@^rompath.*@rompath                   /home/roms/BIOS_roms;/home/roms/MAME/roms;@g" /home/arcade/mame.ini
+      sed -ri "s@^rompath.*@rompath                    /home/roms/BIOS_roms;/home/roms/MAME/roms;@g" /home/arcade/mame.ini
       sed -ri "s@^emulator_roms \"MAME.*@emulator_roms \"MAME\" \"/home/roms/MAME/roms\"@g" /home/arcade/.advance/advmenup.rc
       sed -ri "s@^emulator_roms \"N64.*@emulator_roms \"N64\" \"/home/roms/N64_roms\"@g" /home/arcade/.advance/advmenup.rc
       sed -ri "s@^emulator_roms \"NES.*@emulator_roms \"NES\" \"/home/roms/NES_roms\"@g" /home/arcade/.advance/advmenup.rc
@@ -2323,7 +2837,7 @@ worker_MakeRSCache() {
   fi
 
   if [ "$1" = roms ]; then
-    ask_option $default "How to Search" "Choose an Options" required "Normal path search (filter: *roms)" "-" "Full path search  (filter: *roms*)" "-" || return 0
+    ask_option $default "How to Search" "Choose an Options" required "Normal path search (filter: *roms)" "-" "Full path search  (filter: *roms*)" "-" "Cancel" "-" || return 0
 
     case $ANSWER_OPTION in
       "Normal path search (filter: *roms)")
@@ -2341,14 +2855,14 @@ worker_MakeRSCache() {
           dir=$(find /media/ /home/roms/ -type d -iwholename '*roms*' | sed 's/ /·/g' | awk '{printf("%s -\n", $0)}' >>/home/arcade/.config/cacheroms)
         fi
         ;;
-
+      "Cancel") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
 
     execute worker confidiroms
 
   else
-    ask_option $default "How to Search" "Choose an Options" required "Normal path search (filter: *snaps)" "-" "Full path search  (filter: *snaps*)" "-" || return 0
+    ask_option $default "How to Search" "Choose an Options" required "Normal path search (filter: *snaps)" "-" "Full path search  (filter: *snaps*)" "-" "Cancel" "-" || return 0
 
     case $ANSWER_OPTION in
       "Normal path search (filter: *snaps)")
@@ -2365,7 +2879,7 @@ worker_MakeRSCache() {
           dir=$(find /media/ /home/roms/ -type d -iwholename '*snap*' | sed 's/ /·/g' | awk '{printf("%s -\n", $0)}' >>/home/arcade/.config/cachesnaps)
         fi
         ;;
-
+      "Cancel") return 0 ;;
       *) notify "Bad option $ANSWER_OPTION given" ;;
     esac
 
@@ -2449,10 +2963,6 @@ sanity_checks() {
     ln -s "$GA_CONF" "$_HOME"/.config/ga.conf
   fi
 
-  # Update some files ... God I wish I could have done this another way (pacman
-  # hooks or .install form the package). Sadly as of now I can't use the good
-  # methods since they are not triggered when installed. The hook or .install
-  # had to exist 1 version before
   if [[ ! -e "$_HOME"/1 ]] ; then
     if ! grep -q "/opt/galauncher/startfe-X.sh" "$_HOME"/.xinitrc || ! grep -q "/opt/galauncher/startfe.sh" "$_HOME"/.bash_profile ; then
       cp "$_HOME"/.xinitrc "$_HOME"/.xinitrc.backup
@@ -2462,8 +2972,6 @@ sanity_checks() {
     fi
   fi
 
-  # Fix glthreads being enabled by default in MESA 22.3.0
-  # See https://gitlab.freedesktop.org/mesa/mesa/-/issues/7926
   if [[ ! -e "$_HOME"/.drirc ]] ; then
     log_info "Creating $_HOME/.drirc"
     cat <<EOF | su - ${_USER} -c "tee '$_HOME/.drirc'"
@@ -2475,1731 +2983,14 @@ sanity_checks() {
 EOF
   fi
 
-  # Check for free space left but not on the ISO
+  set_ra_config_value desktop_menu_enable "false"
+
   if [[ $(lsblk --include 7 | grep "archiso" | wc -l) == 1 ]] ; then
     true
   else
     space_left="$(df --output=pcent / | tail -1 | grep -oE '[0-9]+')"
-    if [[ $space_left -lt 10 ]] ; then
+    if [[ $space_left -gt 90 ]] ; then
       notify "Your main drive has less than 10% free space left"
     fi
   fi
 }
-
-
-
-
-
-
-
-
-
-mediafire() {
-url=$(curl -Lqs "$1"|grep "href.*download.*media.*"|tail -1|cut -d '"' -f 2)
-wget "$url" # or wget "$url" if you prefer.
- }
-
-
-
-
-worker_power_atari() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Atari 2600 " \
-      2 "Scraper Atari 2600 " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://dn790009.ca.archive.org/0/items/Atari2600FullRomCollectionReuploadByDataghost/Atari%202600.7z"
-#mediafire https://www.mediafire.com/file/5n6l6qu24p8yh07/atari2600.7z/file
-7z x  atari2600.7z -o/home/arcade/shared/roms
-rm -r atari2600.7z
-cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/atari2600.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-sudo chmod -R 777 /home/arcade/shared/roms
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/atari2600.txt
-sudo -H -u arcade Skyscraper -p atari2600 -e atari2600 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p atari2600 -e atari2600
-sudo rm -R /home/arcade/.skyscraper/cache/atari2600
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-###########################################################################################
-
-
-worker_power_atomis() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Atomiswave " \
-      2 "Scraper Atomiswave " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/jyp4cg3xphcpacf/atomiswave.7z/file
-7z x atomiswave.7z -o/home/arcade/shared/roms
-
-sudo rm -r atomiswave.7z
-sudo chmod -R 777 /home/arcade/shared/roms/atomiswave
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/atomiswave.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/atomiswave.txt
-sudo -H -u arcade Skyscraper -p atomiswave -e atomiswave -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p atomiswave -e atomiswave
-sudo rm -R /home/arcade/.skyscraper/cache/atomiswave
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-###########################################################################################
-worker_power_master() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Master System " \
-      2 "Scraper Master System " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-wget -O arcade.7z "https://download1526.mediafire.com/gb2bj70qtn4g5TppnskLSA35BfbTkOXUWQONhW6axLsXE91amTwHp_K9LLsD6qjyXmm1WSNEgpJ_rt9BL2Z2Z814aFawyxpaxRsCKQ6Rq7-YVv1_8kXMEUhD4LA-mykjRonYVQJAQ2DSFuQsMDg4-iJ8cyEB3nELk3ThUHTIPV8/nw1uufgd28s51cc/mastersystem.7z"
-#mediafire https://www.mediafire.com/file/nw1uufgd28s51cc/mastersystem.7z/file
-7z x mastersystem.7z -o/home/arcade/shared/roms
-
-sudo rm -r mastersystem.7z
-sudo chmod -R 777 /home/arcade/shared/roms/mastersystem
-
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/mastersystem.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/mastersystem.txt
-sudo -H -u arcade Skyscraper -p mastersystem -e mastersystem -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p mastersystem -e mastersystem
-sudo rm -R /home/arcade/.skyscraper/cache/mastersystem
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-###########################################################################################
-worker_power_snes() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Super Nintendo " \
-      2 "Scraper Super Nintendo " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-wget -O arcade.7z "https://download1591.mediafire.com/qg2qr2w7bt1gpcKvXu2f7Ya-DVj_uMGWreTb2669frwB8eRo3B7j2km2YSF97DH64-LPO8ruJcyJ4QGAssCFVXz5RtivztVC0AC_KVsUM_j_IBEEAHfY-vB5gIqCojvTD_XDhwVcFOkCmszE0SA_9kBDcJWsHQ-5m2hQuKzE_24/748wm9wx3ww84ua/snes.7z"
-
-#mediafire https://www.mediafire.com/file/748wm9wx3ww84ua/snes.7z/file
-7z x snes.7z -o/home/arcade/shared/roms
-sudo rm -r snes.7z
-sudo chmod -R 777 /home/arcade/shared/roms/snes
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/snes.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/snes.txt
-sudo -H -u arcade Skyscraper -p snes -e snes -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p snes -e snes
-sudo rm -R /home/arcade/.skyscraper/cache/snes
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-
-
-
-
-###########################################################################################
-worker_power_mega() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Megadrive " \
-      2 "Scraper Megadrive " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/fldiyex6l1y3dt7/megadrive.7z/file
-7z x megadrive.7z -o/home/arcade/shared/roms
-
-sudo rm -r megadrive.7z
-sudo chmod -R 777 /home/arcade/shared/roms/megadrive
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/megadrive.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/megadrive.txt
-sudo -H -u arcade Skyscraper -p megadrive -e megadrive -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p megadrive -e megadrive
-sudo rm -R /home/arcade/.skyscraper/cache/megadrive
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_nes() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Nintendinho " \
-      2 "Scraper Nintendinho " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-wget -O arcade.7z "https://download1348.mediafire.com/333ycrqfxhhgb7e7l4wc-D4hLWlx5KebcDXEl2rXFyFE2Pqo9_BtUo-qpA0GupgjUP2tfKExCJEIiLOBv9nzL9cbeGjeTQSj2YMfnZMN7PFWWEAG297atAqu8EqnHT837TMqplHVlip-AplvRIeA_3pzXrv3IHR0u4FCbGLBytc/8fydyi9abd2x956/nes.7z"
-
-#mediafire https://www.mediafire.com/file/8fydyi9abd2x956/nes.7z/file
-7z x nes.7z -o/home/arcade/shared/roms
-
-sudo rm -r nes.7z
-sudo chmod -R 777 /home/arcade/shared/roms/nes
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/nes.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/nes.txt
-sudo -H -u arcade Skyscraper -p nes -e nes -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p nes -e nes
-sudo rm -R /home/arcade/.skyscraper/cache/nes
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-worker_power_psx() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Playstation 1 " \
-      2 "Scraper Playstation 1 " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/4rkxf8ky1p17u59/psx.7z/file
-7z x psx.7z -o/home/arcade/shared/roms
-
-sudo rm -r psx.7z
-sudo chmod -R 777 /home/arcade/shared/roms/psx
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/psx.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/psx.txt
-sudo -H -u arcade Skyscraper -p psx -e psx -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p psx -e psx
-sudo rm -R /home/arcade/.skyscraper/cache/psx
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_psp() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Sony PSP" \
-      2 "Scraper Sony PSP" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-7z x psp.7z -o/home/arcade/shared/roms
-
-sudo rm -r psp.7z
-sudo chmod -R 777 /home/arcade/shared/roms/psp
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/psp.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/psx.txt
-sudo -H -u arcade Skyscraper -p psp -e psp -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p psp -e psp
-sudo rm -R /home/arcade/.skyscraper/cache/psp
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-
-
-
-
-
-
-worker_power_naomi() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Sega Naomi " \
-      2 "Scraper Sega Naomi " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/xsfl9o9u76qdqas/naomi.7z/file
-7z x naomi.7z -o/home/arcade/shared/roms
-
-sudo rm -r naomi.7z
-sudo chmod -R 777 /home/arcade/shared/roms/naomi
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/naomi.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/naomi.txt
-sudo -H -u arcade Skyscraper -p naomi -e naomi -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p naomi -e naomi
-sudo rm -R /home/arcade/.skyscraper/cache/naomi
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-
-worker_power_gamecube() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Gamecube" \
-      2 "Scraper Gamecube" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/v0s76s2t3zllehn/gc.7z/file
-7z x gc.7z -o/home/arcade/shared/roms
-
-sudo rm -r gc.7z
-sudo chmod -R 777 /home/arcade/shared/roms/gc
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/gc.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/gc.txt
-sudo -H -u arcade Skyscraper -p gc -e gc -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p gc -e gc
-sudo rm -R /home/arcade/.skyscraper/cache/gc
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-worker_power_n64() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Nintendo 64" \
-      2 "Scraper Nintendo 64" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/dgkazes5ysl3o9i/n64.7z/file
-7z x n64.7z -o/home/arcade/shared/roms
-
-sudo rm -r n64.7z
-sudo chmod -R 777 /home/arcade/shared/roms/n64
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/n64.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/n64.txt
-sudo -H -u arcade Skyscraper -p n64 -e gc -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p n64 -e n64
-sudo rm -R /home/arcade/.skyscraper/cache/n64
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_32x() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Sega 32X" \
-      2 "Scraper Sega 32X" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/ravod6gk6ibb4bg/sega32x.7z/file
-7z x sega32x.7z -o/home/arcade/shared/roms
-
-sudo rm -r sega32x.7z
-sudo chmod -R 777 /home/arcade/shared/roms/sega32x
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/sega32x.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/sega32x.txt
-sudo -H -u arcade Skyscraper -p sega32x -e sega32x -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p sega32x -e sega32x
-sudo rm -R /home/arcade/.skyscraper/cache/sega32x
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-
-worker_power_dreancast() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Sega Dreamcast" \
-      2 "Scraper Sega Dreamcast" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/fhffvcwj4xfl6pt/dreamcast.7z/file
-7z x dreamcast.7z -o/home/arcade/shared/roms
-
-sudo rm -r dreamcast.7z
-sudo chmod -R 777 /home/arcade/shared/roms/dreamcast
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/dreamcast.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/dreamcast.txt
-sudo -H -u arcade Skyscraper -p dreamcast -e dreamcast -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p dreamcast -e dreamcast
-sudo rm -R /home/arcade/.skyscraper/cache/dreamcast
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-worker_power_mame() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Arcade Mame" \
-      2 "Scraper Arcade Mame" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-wget -O arcade.7z "https://download853.mediafire.com/0r0bhatzbsvgDtyart8lSSVA_jR42R2riw1prg0yzgP8D2QTVkhCJ53nCIQ8PgUWA8eSaKWSIKlsBgRyWR5tiY_knHwiwUyBnsxOyEhHKkt4Y1NP5U8NTgEsZ32XIppklZOgRUIf5KfMYx6Eo2o_WAM63u-yfCjZ2bXbJ8brQs4/wj18mafv6upccos/arcade.7z"
-#mediafire https://www.mediafire.com/file/wj18mafv6upccos/arcade.7z/file
-7z x arcade.7z -o/home/arcade/shared/roms
-
-sudo rm -r arcade.7z
-sudo chmod -R 777 /home/arcade/shared/roms/arcade
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/arcade.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/arcade.txt
-sudo -H -u arcade Skyscraper -p arcade -e arcade -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p arcade -e arcade
-sudo rm -R /home/arcade/.skyscraper/cache/arcade
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-sudo chmod -R 777 /home/arcade/shared/roms
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_3do() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Panasonic 3DO" \
-      2 "Scraper Panasonic 3DO" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-#mediafirehttps://www.mediafire.com/file/l5y3kxq2pn86xkl/arcade.7z/file
-
-7z x 3do.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r 3do.7z
-sudo chmod -R 777 /home/arcade/shared/roms/3do
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/3do.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/3do.txt
-sudo -H -u arcade Skyscraper -p 3do -e 3do -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p 3do -e 3do
-sudo rm -R /home/arcade/.skyscraper/cache/3do
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_atari5200() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Atari 5200" \
-      2 "Scraper Atari 5200" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1503.mediafire.com/muv5e3nbaxbgxu2QC6dmZUIYpYK2FCOtgFnfPyprNuNFTvYFSUOXtCx_zHmKiGd9kyH_flKBAqAjcu50tQlLNT_k-260n38-tmWJEeJgyqFCi_bqwOJ9IydJhiAlwaELMIlk17nXoBe4_gU2FvPhXDHIf2N7TBSkafl-3OaEYcA/0cnnsseydn2wy0h/atari5200.7z"
-
-#mediafire https://www.mediafire.com/file/0cnnsseydn2wy0h/atari5200.7z/file
-
-7z x atari5200.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r atari5200.7z
-sudo chmod -R 777 /home/arcade/shared/roms/atari5200
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/atari5200.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/atari5200.txt
-sudo -H -u arcade Skyscraper -p atari5200 -e atari5200 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p atari5200 -e atari5200
-sudo rm -R /home/arcade/.skyscraper/cache/atari5200
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-worker_power_atari7800() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Atari 7800" \
-      2 "Scraper Atari 7800" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1339.mediafire.com/kcrqemhc1z8g2vE11wJcmbzK_OmHVBrjAsDUewKoY3AUZoiyjb-rjb2J46efpCLa64gMiv56_NkiYv0QxBF5G0Azuv1fYgBh_zp9DzFlU0p3Vv8XJWo6C5fpo-KpgKUHioxW6xqz6UJSSsbUyDH1nTRlfdBBAxNqlH6GuoXKQyM/m67at9eq57dbovs/atari7800.7z"
-
-#mediafire https://www.mediafire.com/file/m67at9eq57dbovs/atari7800.7z/file
-
-7z x atari7800.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r atari7800.7z
-sudo chmod -R 777 /home/arcade/shared/roms/atari7800
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/atari7800.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/atari7800.txt
-sudo -H -u arcade Skyscraper -p atari7800 -e atari7800 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p atari7800 -e atari7800
-sudo rm -R /home/arcade/.skyscraper/cache/atari7800
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-worker_power_atarijaguar() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Atari Jaguar" \
-      2 "Scraper Atari Jaguar" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1650.mediafire.com/6e916laf57rgT_jfvWcJJgOmC6iaW2ykFMd7FDRCssFMTCkuanSSqKxEXeo8AaK0ZQ2IMrtUMhuOKCZvYYZLbj0QsrKKwroN-5ETGvxL0kAyGFaK61OYVO1uOymA6iTHU92SThw5LIpQstnPaMoAzspfnLp2d8XOSFdwC4aaV_c/g9mgos3myzyf1s3/atarijaguar.7z"
-
-#mediafire https://www.mediafire.com/file/g9mgos3myzyf1s3/atarijaguar.7z/file
-7z x atarijaguar.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r atarijaguar.7z
-sudo chmod -R 777 /home/arcade/shared/roms/atarijaguar
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/atarijaguar.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/atarijaguar.txt
-sudo -H -u arcade Skyscraper -p atarijaguar -e atarijaguar -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p atarijaguar -e atarijaguar
-sudo rm -R /home/arcade/.skyscraper/cache/atarijaguar
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-
-
-worker_power_fba() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-     1 "Roms Final Burn NeoGeo" \
-      2 "Scraper Final Burn NeoGeo" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-mediafire   https://www.mediafire.com/file/2giqjmanvmw0e0x/fba.7z/file
-7z x fba.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r fba.7z
-sudo chmod -R 777 /home/arcade/shared/roms/fba
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/fba.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/fba.txt
-sudo -H -u arcade Skyscraper -p fba -e fba -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p fba -e fba
-sudo rm -R /home/arcade/.skyscraper/cache/fba
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-
-
-
-###########################################################################################
-
-worker_power_gamegear() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Game Gear" \
-      2 "Scraper Game Gear" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1320.mediafire.com/v3g9upsbzwngl-WrBGR0rr6jgvYmXEveVXbFa-qmr5dQ74zOIDemUjJiw2MWSZ4UI4A_3f0MpBgm3zkVLOSs28QUSIxN3u3PbJh9-RkeA06kwCU-y-ZztnXyxMqM0telPz8oAwE66zSHNgw1hdHKtpaPIdkOJVAYD1HwFzeAkQQ/6th1aqm84i3hf0g/gamegear.7z"
-
-#mediafire https://www.mediafire.com/file/6th1aqm84i3hf0g/gamegear.7z/file
-
-7z x gamegear.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r gamegear.7z
-sudo chmod -R 777 /home/arcade/shared/roms/gamegear
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/gamegear.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/gamegear.txt
-sudo -H -u arcade Skyscraper -p gamegear -e gamegear -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p gamegear -e gamegear
-sudo rm -R /home/arcade/.skyscraper/cache/gamegear
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_gb() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Game Boy Advance" \
-      2 "Scraper Game Boy Advance" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1654.mediafire.com/h5lccj8oae5gyXVqolYYeeeEuUAZZsDXDqYzgV7xXDhtupWj5rQFwqPi3v0J76Yyzg0qrBSuiPRjaeeAOxoSAjuJDc8fPR_Q07LLwdKNdG47No8Kc__vYdFtGd20D32LdsfU7S9oJJzH5sCs6Jq6Zf0tSpNqKj8LVm2fgk35cPw/f6iglgc74uhpv2o/gb.7z"
-
-#mediafire https://www.mediafire.com/file/f6iglgc74uhpv2o/gb.7z/file
-
-7z x gb.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r gb.7z
-sudo chmod -R 777 /home/arcade/shared/roms/gb
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/gb.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/gb.txt
-sudo -H -u arcade Skyscraper -p gb -e gb -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p gb -e gb
-sudo rm -R /home/arcade/.skyscraper/cache/gb
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_msx() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms MSX" \
-      2 "Scraper MSX" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/76hdvkfemygzl0f/msx.7z/file
-7z x msx.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r msx.7z
-sudo chmod -R 777 /home/arcade/shared/roms/msx
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/msx.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/msx.txt
-sudo -H -u arcade Skyscraper -p msx -e msx -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p msx -e msx
-sudo rm -R /home/arcade/.skyscraper/cache/msx
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-
-
-###########################################################################################
-worker_power_nds() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Nintendo DS" \
-      2 "Scraper Nintendo DS" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-#mediafirehttps://www.mediafire.com/file/l5y3kxq2pn86xkl/arcade.7z/file
-
-7z x nds.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r nds.7z
-sudo chmod -R 777 /home/arcade/shared/roms/nds
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/nds.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/msx.txt
-sudo -H -u arcade Skyscraper -p nds -e nds -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p nds -e nds
-sudo rm -R /home/arcade/.skyscraper/cache/nds
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_neogeo() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms NeoGeo" \
-      2 "Scraper NeoGeo" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-#mediafirehttps://www.mediafire.com/file/l5y3kxq2pn86xkl/arcade.7z/file
-
-7z x neogeo.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r neogeo.7z
-sudo chmod -R 777 /home/arcade/shared/roms/neogeo
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/neogeo.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/msx.txt
-sudo -H -u arcade Skyscraper -p neogeo -e neogeo -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p neogeo -e neogeo
-sudo rm -R /home/arcade/.skyscraper/cache/neogeo
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_pcengine() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms TurboGrafx-16" \
-      2 "Scraper TurboGrafx-16" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/lx49ku9qy3tf9y9/pcengine.7z/file
-
-7z x pcengine.7z -o/home/arcade/shared/roms
-
-
-sudo rm -r pcengine.7z
-sudo chmod -R 777 /home/arcade/shared/roms/pcengine
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/pcengine.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/pcengine.txt
-sudo -H -u arcade Skyscraper -p pcengine -e pcengine -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p pcengine -e pcengine
-sudo rm -R /home/arcade/.skyscraper/cache/pcengine
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-worker_power_ps2() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Playstation 2 " \
-      2 "Scraper Playstation 2 " \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire  https://www.mediafire.com/file/4enh0hpsjbsn8i8/ps2.7z/file
-7z x ps2.7z -o/home/arcade/shared/roms
-
-sudo rm -r ps2.7z
-sudo chmod -R 777 /home/arcade/shared/roms/ps2
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/ps2.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/ps2.txt
-sudo -H -u arcade Skyscraper -p ps2 -e ps2 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p ps2 -e ps2
-sudo rm -R /home/arcade/.skyscraper/cache/ps2
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-###########################################################################################
-
-worker_power_saturn() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Saturn" \
-      2 "Scraper Saturn" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire  https://www.mediafire.com/file/kf26jnw51n4cuhi/saturn.7z/file
-7z x saturn.7z -o/home/arcade/shared/roms
-
-sudo rm -r saturn.7z
-sudo chmod -R 777 /home/arcade/shared/roms/saturn
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/saturn.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/ps2.txt
-sudo -H -u arcade Skyscraper -p saturn -e saturn -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p saturn -e saturn
-sudo rm -R /home/arcade/.skyscraper/cache/saturn
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-##########################################################################################################
-
-worker_power_segacd() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Sega CD" \
-      2 "Scraper Sega CD" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-
-7z x segacd.7z -o/home/arcade/shared/roms
-
-sudo rm -r segacd.7z
-sudo chmod -R 777 /home/arcade/shared/roms/segacd
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/segacd.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/segacd.txt
-sudo -H -u arcade Skyscraper -p segacd -e segacd -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p segacd -e segacd
-sudo rm -R /home/arcade/.skyscraper/cache/segacd
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-##########################################################################################################
-
-worker_power_sg_1000() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms SG1000" \
-      2 "Scraper SG1000" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/0qmihuw7qiwa2ok/sg1000.7z/file
-
-7z x sg1000.7z
-
-mv sg1000 sg-1000
-sudo chmod -R 777 /home/arcade/sg-1000
-sudo mv sg-1000 /home/arcade/shared/roms
-
-
-sudo rm -r sg1000.7z
-sudo chmod -R 777 /home/arcade/shared/roms/sg-1000
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/sg-1000.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/sg-1000.txt
-sudo -H -u arcade Skyscraper -p sg-1000 -e sg-1000 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p sg-1000 -e sg-1000
-sudo rm -R /home/arcade/.skyscraper/cache/sg-1000
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-##########################################################################################################
-worker_power_cps3() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Capcom III" \
-      2 "Scraper Capcom III" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-wget -O arcade.7z "https://download1323.mediafire.com/mzi33gp95z0gT_Ezi_fM_VYsg0Ui3zdo86-rVTknkkIPdvnTaqhFkyBvV0fn6pIFl2FpErqSX1RhbvJ2wCDhRZnDdOJOXwgFaMVobuAckpYo9d292pcUbj2EL7pFLx2mD7ayvd3irJWhva1j6hUeB5PN1TUVg6Q0imQSy6-1q5I/twzl4b57rxetvp4/cps3.7z"
-
-#mediafire https://www.mediafire.com/file/twzl4b57rxetvp4/cps3.7z/file
-7z x cps3.7z -o/home/arcade/shared/roms
-
-sudo rm -r cps3.7z
-sudo chmod -R 777 /home/arcade/shared/roms/cps3
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/cps3.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/cps3.txt
-sudo -H -u arcade Skyscraper -p arcade -e cps3 -i/home/arcade/shared/roms/cps3 -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p arcade -e cps3 -i/home/arcade/shared/roms/cps3
-
-sudo rm -R /home/arcade/.skyscraper/cache/arcade
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-sudo chmod -R 777 /home/arcade/shared/roms/cps3
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-##########################################################################################################
-worker_power_wii() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-echo "Line number $((I++)) -->  $LN"
-done
-local default=no
-  while [ 0 = 0 ]; do
-  ask_option $default "Espaco ($LN)"  ""  required \
-      1 "Roms Nintendo Wii" \
-      2 "Scraper Nintendo Wii" \
-      3 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute /
-clear
-mediafire https://www.mediafire.com/file/5v7nuai356r0sdu/wii.7z/file
-7z x wii.7z -o/home/arcade/shared/roms
-
-sudo rm -r wii.7z
-sudo chmod -R 777 /home/arcade/shared/roms/wii
-sudo cp -r "/home/arcade/shared/frontends/attract/emulators/base add emulador/wii.cfg" "/home/arcade/shared/frontends/attract/emulators/"
-
-;;
-
-      "2") execute
-clear
-sudo rm -r /home/arcade/shared/frontends/attract/romlists/wii.txt
-sudo -H -u arcade Skyscraper -p wii -e wii -i/home/arcade/shared/roms/wii -c /home/arcade/.skyscraper/config.ini -s screenscraper
-sudo -H -u arcade Skyscraper -p wii -e wii -i/home/arcade/shared/roms/wii
-
-sudo rm -R /home/arcade/.skyscraper/cache/wii
-sudo rm -R /home/arcade/.local/share/Trash
-sudo chmod -R 777 /home/arcade/shared/frontends/attract/emulators
-sudo chmod -R 777 /home/arcade/shared/roms/wii
-;;
-      "3") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-worker_instal_system() {
-#!/usr/bin/env bash
-df -h . | awk '{print $4}' >/tmp/HD.txt
-
-
-FILENAME='/tmp/HD.txt'
-I=0
-for LN in $(cat $FILENAME)
-do
-    echo "Line number $((I++)) -->  $LN"
-done
-sudo chmod -R 777 /home/arcade/shared/frontends/attract
-
-  local default=no
-  while [ 0 = 0 ]; do
-    ask_option $default "Instalar emulador espaco disponivel ($LN)"  ""  required \
-      1 "Arcade 2.0GB" \
-      2 "Atari 2600 500MB" \
-      3 "Atari 5200 500MB" \
-      4 "Atari 7800 600MB" \
-      5 "Atari Jaguar 800 MB" \
-      6 "Atomiswave 1.5GB" \
-      7 "Capcom III 400MB" \
-      8 "Dreamcast 5.0GB" \
-      9 "FBneo 1.8GB" \
-      10 "Gamegear 500MB" \
-      11 "Gameboy 700MB" \
-      12 "Gamecube 5.0GB" \
-      13 "Mastersystem 2.5GB" \
-      14 "Megadrive 1.5GB" \
-      15 "Nintendo 64 1.5GB" \
-      16 "Naomi 1.0GB" \
-      17 "Nintendo 1.2GB" \
-      18 "Playstation 1 1.4GB" \
-      19 "Sega32X 1.0GB" \
-      20 "Super Nintendo 2.0GB" \
-      21 "Nintendo WII 4.0GB" \
-      22 "Voltar ao Menu" || return
-
-    case $ANSWER_OPTION in
-      "1") execute worker power_mame  && default=3 ;;
-      "2") execute worker power_atari && default=4 ;;
-      "3") execute worker power_atari5200 && default=5 ;;
-      "4") execute worker power_atari7800 && default=6 ;;
-      "5") execute worker power_atarijaguar && default=7 ;;
-      "6") execute worker power_atomis && default=8 ;;
-      "7") execute worker power_cps3 && default=8 ;;
-      "8") execute worker power_dreancast && default=9 ;;
-      "9") execute worker power_fba && default=10 ;;
-      "10") execute worker power_gamegear && default=11 ;;
-      "11") execute worker power_gb && default=12 ;;
-      "12") execute worker power_gamecube && default=13 ;;
-      "13") execute worker power_master && default=14 ;;
-      "14") execute worker power_mega && default=15 ;;
-      "15") execute worker power_n64 && default=17 ;;
-      "16") execute worker power_naomi && default=18 ;;
-      "17") execute worker power_nes && default=21 ;;
-      "18") execute worker power_psx && default=23 ;;
-      "19") execute worker power_32x && default=27 ;;
-      "20") execute worker power_snes && default=29 ;;
-      "21") execute worker power_wii  ;;
-      "22") return 0 ;;
-      *) notify "Bad option $ANSWER_OPTION given" ;;
-    esac
-  done
-
-  return 0
-}
-
-
-
-
-
