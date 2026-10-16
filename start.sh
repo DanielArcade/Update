@@ -1,3 +1,8 @@
+# DESCOMPACTAR JUKEBOX EM /home/arcade
+7z x "/home/arcade/Update/Jukebox.7z.001" -o"/home/arcade" -y
+
+sleep 2
+
 7z x "/home/arcade/Update/attractplus.7z" -o"/home/arcade/Update"
 sleep 1
 rm "/home/arcade/Update/attractplus.7z"
@@ -5,7 +10,7 @@ sudo cp "/home/arcade/Update/attractplus" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus"
 
 7z x "/home/arcade/Update/attractplus-kms.7z" -o"/home/arcade/Update"
-sleep 1
+sleep 1	
 rm "/home/arcade/Update/attractplus-kms.7z"
 sudo cp "/home/arcade/Update/attractplus-kms" "/usr/local/bin"
 sudo chmod 777 "/usr/local/bin/attractplus-kms"
@@ -72,3 +77,4 @@ dialog --infobox "Reiniciando..." 10 20
 sleep 5
 clear
 reboot
+sudo pacman -Rdd linux-firmware
