@@ -30,6 +30,12 @@ sleep 1
 #sudo cp "/home/arcade/Update/cobranca" "/home/arcade/shared/frontends/attract"
 #sudo chmod 777  /home/arcade/shared/frontends/attract/cobranca
 
+sudo cp "/home/arcade/Update/startfe.sh" "/opt/galauncher"
+sleep 1
+
+sudo cp "/home/arcade/Update/startfe-X.sh" "/opt/galauncher"
+sleep 1
+
 sudo cp "/home/arcade/Update/interactive" "/opt/gasetup/core/procedures"
 sleep 1
 sudo cp "/home/arcade/Update/alerta.wav" "/home/arcade/.attract/sounds"
