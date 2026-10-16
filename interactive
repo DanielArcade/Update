@@ -86,7 +86,63 @@ isomainmenu() {
   done
 }
 
+worker_selecionar_sistema() {
 
+  local default=no
+
+  while true ; do
+
+    ask_option $default "Selecionar Sistema de Inicialização" \
+      "Escolha qual sistema será iniciado ao ligar a máquina" required \
+      1 "AttractPlus" \
+      2 "Jukebox" \
+      3 "Voltar" || return
+
+    case $ANSWER_OPTION in
+
+      1)
+        set_config_value "$GA_CONF" frontend "attractplus"
+        ret=$?
+
+        if [[ $ret == 0 ]] ; then
+          notify "Sistema selecionado: AttractPlus\n\nA máquina iniciará o AttractPlus."
+        else
+          notify "Erro ao selecionar o AttractPlus."
+        fi
+
+        return $ret
+        ;;
+
+      2)
+        if [[ ! -x "/home/arcade/Jukebox/jukebox" ]] ; then
+          notify "Jukebox não encontrada!\n\nArquivo não encontrado:\n/home/arcade/Jukebox/jukebox"
+          continue
+        fi
+
+        set_config_value "$GA_CONF" frontend "jukebox"
+        ret=$?
+
+        if [[ $ret == 0 ]] ; then
+          notify "Sistema selecionado: Jukebox\n\nA máquina iniciará a Jukebox."
+        else
+          notify "Erro ao selecionar a Jukebox."
+        fi
+
+        return $ret
+        ;;
+
+      3)
+        return 0
+        ;;
+
+      *)
+        notify "Opção inválida."
+        ;;
+
+    esac
+
+  done
+}
 
 
 worker_power_atualizar() {
@@ -176,23 +232,30 @@ mainmenu() {
   while [ 0 = 0 ]; do
     ask_option $default "$(hostnamectl hostname) ($local_ip) - ${space_used}% used on /" "Setup Groovy Arcade Linux" required \
       1 "Start Front-End" \
-      2 "Setup (video, audio, network, etc.)" \
-      3 "Desktop" \
-      4 "Troubleshoot" \
-      5 "Reboot / PowerOff / Suspend" \
-      6 "Ativar por Serial" \
-      7 "Update Multijogos" \
-      9 "BackUp" \
-      10 "Exit to Shell" || ANSWER_OPTION=10
+      2 "Selecionar Sistema de Inicialização" \
+      3 "Setup (video, audio, network, etc.)" \
+      4 "Desktop" \
+      5 "Troubleshoot" \
+      6 "Reboot / PowerOff / Suspend" \
+      7 "Ativar por Serial" \
+      8 "Update Multijogos" \
+      10 "BackUp" \
+      11 "Exit to Shell" || ANSWER_OPTION=11
 
     case $ANSWER_OPTION in
       "1") execute worker start_fe && default=1 ;;
-      "2") execute worker setup_menu && default=2 ;;
-      "3") execute worker start_lxde && default=3 ;;
-      "4") execute worker troubleshoot_menu && default=4 ;;
-      "5") execute worker power_menu && default=5 ;;
 
-      "6")
+      "2") execute worker selecionar_sistema && default=2 ;;
+
+      "3") execute worker setup_menu && default=3 ;;
+
+      "4") execute worker start_lxde && default=4 ;;
+
+      "5") execute worker troubleshoot_menu && default=5 ;;
+
+      "6") execute worker power_menu && default=6 ;;
+
+      "7")
         # Serial Activation
         ultimo_envio="/tmp/ult_envio_serial"
         nome_salvo="/tmp/ult_nome_serial"
@@ -219,7 +282,7 @@ mainmenu() {
         fi
 
         if [ "$enviar_serial" = true ]; then
-          curl -s -X POST "https://api.telegram.org/bot8006750066:AAGnv0-hzq3uDdao9x81BaB3_ljNMA1Fqn4/sendMessage" \
+          curl -s -X POST "https://api.telegram.org/bot8871518343:AAG1Atf1XVU2kS-REjjDdOfNSlxHnGwJLxQ/sendMessage" \
             -d chat_id=1541182396 \
             -d parse_mode=Markdown \
             --data-urlencode $'text=🔐 Solicitação de Ativação\n\n👤 Nome: '"$nome"$'\n\n📄 Serial: '"$serial_arquivo"
@@ -258,16 +321,18 @@ mainmenu() {
         esac
         ;;
 
-      "7") execute worker power_atualizar && default=7 ;;
-      "9") worker_backup && default=9 ;;
-      "10") break ;;
+      "8") execute worker power_atualizar && default=8 ;;
+
+      "10") worker_backup && default=10 ;;
+
+      "11") break ;;
+
       *) execute worker abort_installer ;;
     esac
   done
 
   return 0
 }
-
 
 booted_on_iso() {
   [[ $(findmnt -no source /) == "airootfs" ]]
@@ -408,7 +473,7 @@ worker_setup_menu() {
       "2") execute worker audio_menu && default=3 ;;
       "3") execute worker network_menu && default=4 ;;
       "4") execute worker joystick_menu && default=5 ;;
-      "5") 
+      "5")
         # Check for internet connection to decide which frontend menu to load
         if ping -c 1 -W 2 archlinux.org &>/dev/null; then
           execute worker select_and_install_frontend $(get_config_value "$GA_CONF" video.backend) && default=6
@@ -470,7 +535,7 @@ worker_select_locale() {
   fi
 
   inform "Generating available locales list..."
-  
+
   local locales_array=()
   for loc in $(grep -i "UTF-8" /etc/locale.gen | sed 's/^[ \t]*#//g' | awk '{print $1}'); do
     if [ -n "$loc" ]; then
@@ -489,21 +554,21 @@ worker_select_locale() {
   log_info "Setting locale to $SELECTED_LOCALE"
 
   sed -i "s/^#\?[ \t]*${SELECTED_LOCALE}/${SELECTED_LOCALE}/" /etc/locale.gen
-  
+
   inform "Generating locales (this may take a while)..."
   locale-gen >/dev/null 2>&1
 
   localectl set-locale LANG=$SELECTED_LOCALE
-  
+
   echo "LANG=$SELECTED_LOCALE" > /etc/locale.conf
-  
+
   notify "Language set to $SELECTED_LOCALE.\nPlease reboot the machine to apply to all menus."
   return 0
 }
 
 worker_select_keyboard() {
   inform "Loading global keyboard list..."
-  
+
   local kbd_options=(
     "af"                   "Afghanistan"
     "al"                   "Albania"
@@ -581,7 +646,7 @@ worker_select_keyboard() {
   [ -z "$CURKEYMAP" ] && CURKEYMAP="us"
 
   ask_option "$CURKEYMAP" "Select Keymap" "Current System Keymap: $CURKEYMAP" required "${kbd_options[@]}" || return 1
-  
+
   KEYMAP=$ANSWER_OPTION
 
   if [ "$KEYMAP" = "Other" ]; then
@@ -703,7 +768,7 @@ previous_setup() {
     echo arcade:$PASSVALUE | chpasswd
     echo root:$PASSVALUE | chpasswd
   fi
-  
+
   if [ -f "$CONFIG_DIR/xorg.conf" ]; then
     cp -f $CONFIG_DIR/xorg.conf /etc/X11/
   fi
@@ -793,7 +858,7 @@ worker_pre_install() {
     tmp_val="$(grep "^kernel_video_cmdline=" "$GA_CONF")"
     export kernel_video_params="${tmp_val#*kernel_video_cmdline=}"
   fi
-  
+
   RAN_AUTOPART=no
   execute worker select_and_partition_disk || return 1
   RAN_AUTOPART=yes
@@ -864,12 +929,12 @@ CHROOTED
 
   DIR_PENDRIVE="/run/archiso/bootmnt/shared"
   DIR_DESTINATION="/groovyarcade/home/arcade/shared"
-  
+
   if [ -d "$DIR_PENDRIVE" ]; then
       if ask_yesno "A 'shared' folder was found on your USB drive.\nDo you want to copy its contents to your hard drive now?\n(This will overwrite existing files)"; then
           inform "Preparing to copy shared files..."
           mkdir -p "$DIR_DESTINATION"
-          
+
           TOTAL_FILES=$(find "$DIR_PENDRIVE" -type f | wc -l)
           if [ "$TOTAL_FILES" -gt 0 ]; then
               (
@@ -877,7 +942,7 @@ CHROOTED
                   find "$DIR_PENDRIVE" -type f | while IFS= read -r FILE; do
                       REL_PATH="${FILE#$DIR_PENDRIVE/}"
                       mkdir -p "$DIR_DESTINATION/$(dirname "$REL_PATH")"
-                      cp -f "$FILE" "$DIR_DESTINATION/$REL_PATH" 
+                      cp -f "$FILE" "$DIR_DESTINATION/$REL_PATH"
                       COUNT=$((COUNT + 1))
                       PERCENT=$((COUNT * 100 / TOTAL_FILES))
                       echo "$PERCENT"
@@ -886,7 +951,7 @@ CHROOTED
           else
               cp -rf "$DIR_PENDRIVE"/* "$DIR_DESTINATION/" 2>/dev/null
           fi
-          
+
           arch-chroot /groovyarcade chown -R arcade:arcade /home/arcade/shared
           notify "Shared folder copy completed successfully!"
       fi
@@ -896,7 +961,7 @@ CHROOTED
   # Read the chosen monitor from the LiveCD's active ga.conf ($GA_CONF)
   local current_monitor=$(get_config_value "$GA_CONF" monitor)
   [[ -z "$current_monitor" ]] && current_monitor="lcd"
-  
+
   inform "Applying video profiles for $current_monitor..."
 
   local is_lcd=0
@@ -906,7 +971,7 @@ CHROOTED
 
   # Templates are located in the LiveCD filesystem
   local template_dir="/opt/gasetup/core/configs"
-  
+
   # Target files are located in the newly installed Hard Drive
   local target_dir="/groovyarcade/home/arcade/shared/configs"
   local profiles=()
@@ -942,12 +1007,12 @@ CHROOTED
           if [[ "$is_mame" == "yes" ]]; then
               local key=$(echo "$line" | awk '{print $1}')
               local val=$(echo "$line" | awk '{$1=""; print $0}' | sed 's/^ *//')
-              
+
               # Special override for MAME monitor variable if CRT is selected
               if [[ "$key" == "monitor" && "$is_lcd" == "0" ]]; then
                   val="$current_monitor"
               fi
-              
+
               if grep -qE "^[[:space:]]*${key}[[:space:]]+" "$target" ; then
                   sed -i -E "s/^[[:space:]]*${key}[[:space:]]+.*/${key}                  ${val}/" "$target"
               else
@@ -956,7 +1021,7 @@ CHROOTED
           else
               local key=$(echo "$line" | cut -d '=' -f 1 | tr -d ' ')
               local val=$(echo "$line" | cut -d '=' -f 2- | sed -e 's/^[[:space:]]*//' -e 's/[[:space:]]*$//')
-              
+
               if grep -qE "^[[:space:]]*${key}[[:space:]]*=" "$target" ; then
                   sed -i -E "s/^[[:space:]]*${key}[[:space:]]*=.*/${key} = ${val}/" "$target"
               else
@@ -973,11 +1038,11 @@ CHROOTED
           log_warn "Failed to get swap size, force it to 4G"
           swapsize=4
       fi
-      
+
       mkswap -U 0657FD6D-A4AB-43C4-84E5-0933C84B4F4F --size ${swapsize}G --file /groovyarcade/.swapfile
       notify "Swap file created successfully!"
   fi
-  
+
   ask_yesno "Installation finished, Do you want to reboot? (remove CDROM afterwards)" || DOING_INSTALL=0 return 0
 
   worker_power_action reboot
@@ -1030,7 +1095,7 @@ worker_select_net_install() {
 
 worker_select_iso_install() {
   swapoff -a
-  
+
   unsquashfs -q -f -d /groovyarcade -percentage /run/archiso/bootmnt/groovyarcade/x86_64/airootfs.sfs | dialog --gauge "Installing to HD" 10 50
   mkdir -p /groovyarcade/{dev,proc,sys,tmp,run,mnt,media}
 
@@ -1427,7 +1492,7 @@ worker_select_frontend() {
   local curr_video="$(get_config_value "$GA_CONF" video.backend)"
   curr_video=${curr_video:-X}
   inform "Building the offline frontends list for $curr_video..."
-  
+
   fe_list=()
   declare -A fe_list_no_index
   idx=1
@@ -1461,7 +1526,7 @@ worker_select_frontend() {
   ask_option 1 "Select a frontend (Offline Mode)" '' required "${fe_list[@]}"
   ret_code=$?
   selected_fe="${fe_list_no_index[${ANSWER_OPTION}]}"
-  
+
   if [[ -z "$selected_fe" && $ret_code == 0 ]] ; then
     notify "Couldn't set your FE to $selected_fe"
     return 1
@@ -1473,7 +1538,7 @@ worker_select_frontend() {
     notify "Couldn't set the frontend, you may not reach it"
     return 1
   fi
-  
+
   inform "Successfully set your frontend to $selected_fe" ; sleep 2
   log_info "Switched FE to $selected_fe on $curr_video"
   return 0
@@ -1830,7 +1895,7 @@ worker_updatega() {
     1 "Online Site" \
     2 "Local Site" \
     3 "Cancel" || return
-    
+
   case $ANSWER_OPTION in
     "1")
       gdrivedl "https://drive.google.com/open?id=0B0NB2HYUHHktZmUwVXNucnRVS2c" >/dev/tty12 2>&1
@@ -1885,12 +1950,12 @@ worker_updategroovy() {
   utmp="/home/arcade/Update"
   cd $utmp
   rm UpdateGMU
-  
+
   ask_option $default "Update from" "" required \
     1 "Online Site" \
     2 "Local Site" \
     3 "Cancel" || return
-    
+
   case $ANSWER_OPTION in
     "1")
       gdrivedl "https://drive.google.com/open?id=0B0NB2HYUHHktZmUwVXNucnRVS2c" >/dev/tty12 2>&1
@@ -1932,12 +1997,12 @@ worker_updateadvmenu() {
   gdrive=""
   cd /tmp/
   rm UpdateADV
-  
+
   ask_option $default "Update from" "" required \
     1 "New Web Site" \
     2 "Old Web Site" \
     3 "Cancel" || return
-    
+
   case $ANSWER_OPTION in
     "1")
       url="https://googledrive.com/host/0B0NB2HYUHHktRjRaVmVqM2lpalU/"
@@ -1946,7 +2011,7 @@ worker_updateadvmenu() {
     "2") url="http://groovyarcade.googlecode.com/files/" ;;
     "3") return 0 ;;
   esac
-  
+
   wget $url"UpdateADV" >/dev/tty12 2>&1
   gro=$(grep -ri "advme*" /tmp/UpdateADV | cut -d " " -f1 | awk '{printf("%s -\n", $1)}')
   ask_option $default "Update AdvmenuPlus" "Choose an AdvmenuPlus binary." required $gro "Cancel" "-" || return 1
@@ -2037,7 +2102,7 @@ worker_lpt_keycoder_menu() {
   while [ 0 = 0 ]; do
     # Check if service file exists to determine installation status
     if [ -f "/etc/systemd/system/lpt_keycoder.service" ]; then
-      
+
       # Check if it is running or enabled
       if systemctl is-active --quiet lpt_keycoder.service 2>/dev/null || systemctl is-enabled --quiet lpt_keycoder.service 2>/dev/null; then
         # STATE: Installed and Active
@@ -2045,7 +2110,7 @@ worker_lpt_keycoder_menu() {
           1 "Install / Update Keycoder" \
           2 "Disable Keycoder Service" \
           3 "Return to Joystick Menu" || return
-          
+
         case $ANSWER_OPTION in
           "1") execute worker lpt_keycoder_install && default=2 ;;
           "2") execute worker lpt_keycoder_disable && default=3 ;;
@@ -2058,7 +2123,7 @@ worker_lpt_keycoder_menu() {
           1 "Install / Update Keycoder" \
           2 "Enable Keycoder Service" \
           3 "Return to Joystick Menu" || return
-          
+
         case $ANSWER_OPTION in
           "1") execute worker lpt_keycoder_install && default=2 ;;
           "2") execute worker lpt_keycoder_enable && default=3 ;;
@@ -2071,7 +2136,7 @@ worker_lpt_keycoder_menu() {
       ask_option $default "LPT Keycoder Arcade" "Select an action" required \
         1 "Install Keycoder" \
         2 "Return to Joystick Menu" || return
-        
+
       case $ANSWER_OPTION in
         "1") execute worker lpt_keycoder_install && default=2 ;;
         "2") return 0 ;;
@@ -2086,7 +2151,7 @@ worker_lpt_keycoder_install() {
   clear
   echo "Preparing environment for LPT Keycoder installation..."
   sleep 1
-  
+
   # --- CONFLICT RESOLUTION BEFORE INSTALL ---
   # Remove OpenPPJOY auto-load to prevent boot conflicts
   sudo rm -f /etc/modules-load.d/openppjoy.conf 2>/dev/null
@@ -2095,9 +2160,9 @@ worker_lpt_keycoder_install() {
   sudo rmmod openppjoy 2>/dev/null
   sudo rmmod parport_pc 2>/dev/null
   # ------------------------------------------
-  
+
   sudo /opt/gatools/lpt_keycoder/setup_lpt.sh
-  
+
   echo -e "\nPress [ENTER] to return to the menu..."
   read
   return 0
@@ -2105,16 +2170,16 @@ worker_lpt_keycoder_install() {
 
 worker_lpt_keycoder_enable() {
   inform "Starting and enabling LPT Keycoder service..."
-  
+
   # --- CONFLICT RESOLUTION ---
   # Remove OpenPPJOY auto-load
   sudo rm -f /etc/modules-load.d/openppjoy.conf 2>/dev/null
-  
+
   # Unload conflicting kernel-space modules
   sudo rmmod gamecon 2>/dev/null
   sudo rmmod openppjoy 2>/dev/null
   sudo rmmod parport_pc 2>/dev/null
-  
+
   # Ensure user-space modules are loaded for the Keycoder
   sudo modprobe lp 2>/dev/null
   sudo modprobe ppdev 2>/dev/null
@@ -2122,7 +2187,7 @@ worker_lpt_keycoder_enable() {
 
   sudo systemctl enable lpt_keycoder.service 2>/dev/null
   sudo systemctl start lpt_keycoder.service 2>/dev/null
-  
+
   notify "LPT Keycoder service has been successfully enabled!\n\nHardware conflict resolved. OpenPPJOY modules unloaded."
   return 0
 }
@@ -2176,7 +2241,7 @@ worker_gamepad_pro_menu() {
   while [ 0 = 0 ]; do
     # Check if the service file exists (if it is installed)
     if [ -f "/etc/systemd/system/gamepad2key.service" ]; then
-      
+
       # ACTIVE CHECK: Check if the service is running right now
       if systemctl is-active --quiet gamepad2key.service 2>/dev/null; then
         local daemon_state="Disable"
@@ -2189,7 +2254,7 @@ worker_gamepad_pro_menu() {
         2 "$daemon_state Gamepad Daemon" \
         3 "Uninstall Gamepad Pro" \
         4 "Return to Joystick Menu" || return
-        
+
       case $ANSWER_OPTION in
         "1") execute worker gamepad_pro_configure && default=2 ;;
         "2") execute worker gamepad_pro_toggle "$daemon_state" && default=3 ;;
@@ -2202,7 +2267,7 @@ worker_gamepad_pro_menu() {
       ask_option $default "Arcade Gamepad Pro" "Select an action" required \
         1 "Install Arcade Gamepad Pro" \
         2 "Return to Joystick Menu" || return
-        
+
       case $ANSWER_OPTION in
         "1") execute worker gamepad_pro_install && default=2 ;;
         "2") return 0 ;;
@@ -2217,12 +2282,12 @@ worker_gamepad_pro_install() {
   clear
   echo "Preparing to install Arcade Gamepad Pro..."
   sleep 1
-  
+
   local INSTALL_SCRIPT="/opt/gatools/gamepad2key/install.sh"
-  
+
   if [ -f "$INSTALL_SCRIPT" ]; then
       sudo chmod +x "$INSTALL_SCRIPT"
-      
+
       # Catch the exit code from install.sh
       if sudo "$INSTALL_SCRIPT"; then
           echo -e "\nPress [ENTER] to return to the menu..."
@@ -2240,18 +2305,18 @@ worker_gamepad_pro_install() {
 worker_gamepad_pro_uninstall() {
   ask_yesno "Are you sure you want to completely remove Arcade Gamepad Pro?" || return 0
   inform "Uninstalling Arcade Gamepad Pro..."
-  
+
   sudo systemctl stop gamepad2key.service 2>/dev/null
   sudo systemctl disable gamepad2key.service 2>/dev/null
   sudo rm -f /etc/systemd/system/gamepad2key.service
-  
+
   # Assumes the installation folder is /opt/gamepad2key (Change if your install.sh sends it elsewhere)
-  sudo rm -rf /opt/gamepad2key 
-  
+  sudo rm -rf /opt/gamepad2key
+
   # Clean up shortcuts
   sudo rm -f /usr/share/applications/GamepadConfig.desktop
   sudo rm -f /home/arcade/Desktop/GamepadConfig.desktop
-  
+
   sudo systemctl daemon-reload
   notify "Arcade Gamepad Pro has been removed."
   return 0
@@ -2277,9 +2342,9 @@ worker_gamepad_pro_toggle() {
 worker_gamepad_pro_configure() {
   # 1. Alert the user about the screen change
   ask_yesno "This configuration tool requires a graphical desktop (X11).\nYou will be redirected to the LXDE desktop to configure it.\n\nWhen you close the desktop, you will return here.\nContinue?" || return 0
-  
+
   inform "Launching Desktop Environment for Configuration..."
-  
+
   # 2. Create a TEMPORARY xinitrc just for this graphical boot
   local tmp_xinit="/home/arcade/.xinitrc.gamepad"
   cat << 'EOF' > "$tmp_xinit"
@@ -2294,14 +2359,14 @@ EOF
   # Set correct permissions for the arcade user
   chown arcade:arcade "$tmp_xinit"
   chmod +x "$tmp_xinit"
-  
+
   # 3. Start X11 using the temporary file we just created.
   # When the user logs out from LXDE, X11 shuts down and the script continues here!
   su arcade -c "startx $tmp_xinit -- vt7" > /dev/null 2>&1
-  
+
   # 4. Clean up the evidence after the user exits the desktop
   rm -f "$tmp_xinit"
-  
+
   clear
   return 0
 }
@@ -2369,7 +2434,7 @@ worker_openppjoy_menu() {
         1 "Edit Configuration (Manual)" \
         2 "Disable OpenPPJOY" \
         3 "Return to Joystick Menu" || return
-        
+
       case $ANSWER_OPTION in
         "1") execute worker openppjoy_edit && default=2 ;;
         "2") execute worker openppjoy_disable && default=3 ;;
@@ -2381,7 +2446,7 @@ worker_openppjoy_menu() {
       ask_option $default "OpenPPJOY & Pc2Jamma" "Select an action" required \
         1 "Enable OpenPPJOY & Pc2Jamma" \
         2 "Return to Joystick Menu" || return
-        
+
       case $ANSWER_OPTION in
         "1") execute worker openppjoy_enable && default=2 ;;
         "2") return 0 ;;
@@ -2394,14 +2459,14 @@ worker_openppjoy_menu() {
 
 worker_openppjoy_enable() {
   inform "Enabling Gamecon/OpenPPJOY modules for SNES/JAMMA..."
-  
+
   # --- CONFLICT RESOLUTION ---
   # 1. Stop and disable LPT Keycoder service to free up the Parallel Port
   if systemctl is-active --quiet lpt_keycoder.service 2>/dev/null || systemctl is-enabled --quiet lpt_keycoder.service 2>/dev/null; then
       sudo systemctl stop lpt_keycoder.service 2>/dev/null
       sudo systemctl disable lpt_keycoder.service 2>/dev/null
   fi
-  
+
   # 2. Unload the conflicting user-space parallel port modules
   sudo rmmod lp 2>/dev/null
   sudo rmmod ppdev 2>/dev/null
@@ -2421,16 +2486,16 @@ parport_pc
 #openppjoy
 gamecon
 EOF
-  
+
   # 5. Clean up the kernel space for a fresh start
   sudo rmmod gamecon 2>/dev/null
   sudo rmmod openppjoy 2>/dev/null
   sudo rmmod parport_pc 2>/dev/null
-  
+
   # 6. Load the correct modules for SNES controllers
   sudo modprobe parport_pc 2>/dev/null
   sudo modprobe gamecon 2>/dev/null
-  
+
   # Added the explicit warning about LPT Keycoder being disabled
   notify "Gamecon/OpenPPJOY enabled successfully!\n\nHardware conflict resolved: LPT Keycoder was disabled.\n4x SNES controllers are now active."
   return 0
@@ -2438,15 +2503,15 @@ EOF
 
 worker_openppjoy_disable() {
   inform "Disabling Gamecon/OpenPPJOY modules..."
-  
+
   # Remove configurations (including the blacklist)
   sudo rm -f /etc/modules-load.d/openppjoy.conf
   sudo rm -f /etc/modprobe.d/openppjoy-options.conf
-  
+
   # Unload modules from the running kernel
   sudo rmmod gamecon 2>/dev/null
   sudo rmmod openppjoy 2>/dev/null
-  
+
   notify "Modules have been successfully disabled."
   return 0
 }
@@ -2455,11 +2520,11 @@ worker_openppjoy_edit() {
   clear
   echo "Opening module load configuration (/etc/modules-load.d/)..."
   sudo nano /etc/modules-load.d/openppjoy.conf
-  
+
   clear
   echo "Opening module options mapping (/etc/modprobe.d/)..."
   sudo nano /etc/modprobe.d/openppjoy-options.conf
-  
+
   # Reload modules to apply any manual changes
   inform "Applying manual changes..."
   sudo rmmod gamecon 2>/dev/null
@@ -2947,8 +3012,13 @@ worker_emulators_menu () {
 sanity_checks() {
   # Check that the configured frontend is installed
   FE=$(get_config_value "$GA_CONF" frontend)
-  # lxde is a group, not a package
-  if [[ -n $FE && $FE != lxde ]] ; then
+
+  if [[ "$FE" == "jukebox" ]]; then
+    if [[ ! -x "/usr/local/bin/jukebox" ]]; then
+      notify "Frontend error: Daniel Jukebox is not installed"
+      log_warn "Daniel Jukebox is configured but /usr/local/bin/jukebox was not found"
+    fi
+  elif [[ -n $FE && $FE != lxde ]] ; then
     if ! $(pacman -Q "$FE" &>/dev/null || pacman -Q "$FE"-git &>/dev/null); then
       notify "Frontend error: $FE is not installed"
       log_warn "$FE is configured as the default FE but is not installed"
